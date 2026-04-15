@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Search, Music, Download, Trash2, CheckCircle, Loader2 } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Search, Music, Download, Trash2, CheckCircle, Loader2, ListMusic, Plus, X, GripVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { surahs } from './data/surahs';
 import { isSurahCached, downloadSurah, deleteCachedSurah, getCachedAudioUrl, getAllCachedSurahIds } from './lib/cache';
@@ -41,6 +41,8 @@ export default function App() {
   const [downloadedSurahs, setDownloadedSurahs] = useState<Set<number>>(new Set());
   const [downloadingSurahs, setDownloadingSurahs] = useState<Set<number>>(new Set());
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
+  const [queue, setQueue] = useState<typeof surahs>([]);
+  const [isQueueOpen, setIsQueueOpen] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -142,7 +144,25 @@ export default function App() {
     setIsPlaying(true);
   };
 
+  const addToQueue = (e: React.MouseEvent, surah: typeof surahs[0]) => {
+    e.stopPropagation();
+    setQueue(prev => [...prev, surah]);
+  };
+
+  const removeFromQueue = (index: number) => {
+    setQueue(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const clearQueue = () => setQueue([]);
+
   const playNext = () => {
+    if (queue.length > 0) {
+      const nextSurah = queue[0];
+      setQueue(prev => prev.slice(1));
+      playSurah(nextSurah);
+      return;
+    }
+
     const currentIndex = surahs.findIndex(s => s.id === currentSurah.id);
     if (currentIndex < surahs.length - 1) {
       playSurah(surahs[currentIndex + 1]);
@@ -330,6 +350,14 @@ export default function App() {
                     </div>
                     
                     <div className="flex items-center space-x-2">
+                      <button
+                        onClick={(e) => addToQueue(e, surah)}
+                        className="p-2 rounded-full bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all"
+                        title="Add to queue"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                      
                       {downloadedSurahs.has(surah.id) ? (
                         <button
                           onClick={(e) => handleDelete(e, surah.id)}
@@ -461,27 +489,46 @@ export default function App() {
               </div>
             </div>
 
-            {/* Volume & Speed */}
-            <div className="flex flex-1 justify-between md:justify-end items-center w-full md:w-auto space-x-6">
-              <div className="flex items-center space-x-2">
-                <span className="text-[10px] uppercase tracking-widest text-emerald-500/50 font-bold">Speed</span>
-                <div className="relative">
-                  <select 
-                    value={playbackSpeed}
-                    onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
-                    className="bg-emerald-900/40 text-emerald-400 text-xs font-mono py-1 px-2 pr-6 rounded-lg border border-emerald-800/30 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer appearance-none"
-                  >
-                    <option value={0.5}>0.5x</option>
-                    <option value={0.75}>0.75x</option>
-                    <option value={1}>1.0x</option>
-                    <option value={1.25}>1.25x</option>
-                    <option value={1.5}>1.5x</option>
-                    <option value={2}>2.0x</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-1 flex items-center pointer-events-none">
-                    <svg className="w-3 h-3 text-emerald-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+            {/* Volume & Speed & Queue */}
+            <div className="flex flex-1 justify-between md:justify-end items-center w-full md:w-auto space-x-4 md:space-x-6">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setIsQueueOpen(!isQueueOpen)}
+                  className={`p-2 rounded-xl border transition-all relative ${
+                    isQueueOpen 
+                      ? 'bg-emerald-500 text-emerald-950 border-emerald-400' 
+                      : 'bg-emerald-900/40 border-emerald-800/30 text-emerald-400 hover:border-emerald-500/50'
+                  }`}
+                  title="Playback Queue"
+                >
+                  <ListMusic className="w-5 h-5" />
+                  {queue.length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 text-emerald-950 text-[10px] font-bold rounded-full flex items-center justify-center border border-emerald-950">
+                      {queue.length}
+                    </span>
+                  )}
+                </button>
+
+                <div className="flex items-center space-x-2">
+                  <span className="text-[10px] uppercase tracking-widest text-emerald-500/50 font-bold hidden sm:inline">Speed</span>
+                  <div className="relative">
+                    <select 
+                      value={playbackSpeed}
+                      onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
+                      className="bg-emerald-900/40 text-emerald-400 text-xs font-mono py-1 px-2 pr-6 rounded-lg border border-emerald-800/30 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer appearance-none"
+                    >
+                      <option value={0.5}>0.5x</option>
+                      <option value={0.75}>0.75x</option>
+                      <option value={1}>1.0x</option>
+                      <option value={1.25}>1.25x</option>
+                      <option value={1.5}>1.5x</option>
+                      <option value={2}>2.0x</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-1 flex items-center pointer-events-none">
+                      <svg className="w-3 h-3 text-emerald-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -495,6 +542,87 @@ export default function App() {
             </div>
           </div>
         </motion.div>
+
+        {/* Queue Panel */}
+        <AnimatePresence>
+          {isQueueOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsQueueOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+              />
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed top-0 right-0 h-full w-full max-w-md bg-emerald-950 border-l border-emerald-800/50 z-[70] shadow-2xl flex flex-col"
+              >
+                <div className="p-6 border-b border-emerald-800/50 flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <ListMusic className="w-6 h-6 text-emerald-400" />
+                    <h2 className="text-xl font-serif text-emerald-50">Playback Queue</h2>
+                  </div>
+                  <button 
+                    onClick={() => setIsQueueOpen(false)}
+                    className="p-2 rounded-full hover:bg-emerald-900/50 text-emerald-400 transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                  {queue.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-emerald-500/40 space-y-4">
+                      <Music className="w-12 h-12 opacity-20" />
+                      <p className="text-center">Your queue is empty.<br/>Add Surahs from the list.</p>
+                    </div>
+                  ) : (
+                    queue.map((surah, index) => (
+                      <motion.div
+                        layout
+                        key={`${surah.id}-${index}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center justify-between p-3 rounded-xl bg-emerald-900/20 border border-emerald-800/20 group hover:border-emerald-500/30 transition-all"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-900/50 flex items-center justify-center text-xs font-mono text-emerald-400">
+                            {index + 1}
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium text-emerald-50">{surah.name_english}</h4>
+                            <p className="text-[10px] text-emerald-400/60 font-serif">{surah.name_arabic}</p>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => removeFromQueue(index)}
+                          className="p-2 rounded-lg text-emerald-500/40 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </motion.div>
+                    ))
+                  )}
+                </div>
+
+                {queue.length > 0 && (
+                  <div className="p-6 border-t border-emerald-800/50">
+                    <button 
+                      onClick={clearQueue}
+                      className="w-full py-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all text-sm font-medium border border-red-500/20"
+                    >
+                      Clear Queue
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
       
       <style>{`
