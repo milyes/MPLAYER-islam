@@ -41,7 +41,7 @@ export default function App() {
   const [downloadedSurahs, setDownloadedSurahs] = useState<Set<number>>(new Set());
   const [downloadingSurahs, setDownloadingSurahs] = useState<Set<number>>(new Set());
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
-  const [queue, setQueue] = useState<typeof surahs>([]);
+  const [queue, setQueue] = useState<(typeof surahs[0] & { queueId: string })[]>([]);
   const [isQueueOpen, setIsQueueOpen] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -146,11 +146,12 @@ export default function App() {
 
   const addToQueue = (e: React.MouseEvent, surah: typeof surahs[0]) => {
     e.stopPropagation();
-    setQueue(prev => [...prev, surah]);
+    const queueItem = { ...surah, queueId: Math.random().toString(36).substring(7) + Date.now() };
+    setQueue(prev => [...prev, queueItem]);
   };
 
-  const removeFromQueue = (index: number) => {
-    setQueue(prev => prev.filter((_, i) => i !== index));
+  const removeFromQueue = (queueId: string) => {
+    setQueue(prev => prev.filter(item => item.queueId !== queueId));
   };
 
   const clearQueue = () => setQueue([]);
@@ -574,39 +575,56 @@ export default function App() {
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-                  {queue.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-emerald-500/40 space-y-4">
-                      <Music className="w-12 h-12 opacity-20" />
-                      <p className="text-center">Your queue is empty.<br/>Add Surahs from the list.</p>
-                    </div>
-                  ) : (
-                    queue.map((surah, index) => (
-                      <motion.div
-                        layout
-                        key={`${surah.id}-${index}`}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center justify-between p-3 rounded-xl bg-emerald-900/20 border border-emerald-800/20 group hover:border-emerald-500/30 transition-all"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-900/50 flex items-center justify-center text-xs font-mono text-emerald-400">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-medium text-emerald-50">{surah.name_english}</h4>
-                            <p className="text-[10px] text-emerald-400/60 font-serif">{surah.name_arabic}</p>
-                          </div>
-                        </div>
-                        <button 
-                          onClick={() => removeFromQueue(index)}
-                          className="p-2 rounded-lg text-emerald-500/40 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100"
+                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                  <div className="space-y-3">
+                    <AnimatePresence mode="popLayout">
+                      {queue.length === 0 ? (
+                        <motion.div
+                          key="empty-queue"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="h-full flex flex-col items-center justify-center text-emerald-500/40 space-y-4 py-20"
                         >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </motion.div>
-                    ))
-                  )}
+                          <Music className="w-12 h-12 opacity-20" />
+                          <p className="text-center">Your queue is empty.<br/>Add Surahs from the list.</p>
+                        </motion.div>
+                      ) : (
+                        queue.map((surah, index) => (
+                          <motion.div
+                            layout
+                            key={surah.queueId}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                            transition={{ 
+                              type: 'spring', 
+                              stiffness: 500, 
+                              damping: 30,
+                              opacity: { duration: 0.2 }
+                            }}
+                            className="flex items-center justify-between p-3 rounded-xl bg-emerald-900/20 border border-emerald-800/20 group hover:border-emerald-500/30 transition-all"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 rounded-lg bg-emerald-900/50 flex items-center justify-center text-xs font-mono text-emerald-400">
+                                {index + 1}
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-medium text-emerald-50">{surah.name_english}</h4>
+                                <p className="text-[10px] text-emerald-400/60 font-serif">{surah.name_arabic}</p>
+                              </div>
+                            </div>
+                            <button 
+                              onClick={() => removeFromQueue(surah.queueId)}
+                              className="p-2 rounded-lg text-emerald-500/40 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </motion.div>
+                        ))
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
 
                 {queue.length > 0 && (
