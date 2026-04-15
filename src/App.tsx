@@ -40,7 +40,7 @@ export default function App() {
   const [showDownloadedOnly, setShowDownloadedOnly] = useState(false);
   const [downloadedSurahs, setDownloadedSurahs] = useState<Set<number>>(new Set());
   const [downloadingSurahs, setDownloadingSurahs] = useState<Set<number>>(new Set());
-  const [audioSrc, setAudioSrc] = useState('');
+  const [audioSrc, setAudioSrc] = useState<string | null>(null);
   
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -222,13 +222,51 @@ export default function App() {
           </button>
         </div>
 
+        {/* Featured Surah Info */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          key={currentSurah.id}
+          className="mb-8 p-6 rounded-3xl bg-emerald-900/20 border border-emerald-800/30 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6"
+        >
+          <div className="flex items-center space-x-6">
+            <div className="w-20 h-20 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-3xl font-mono text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+              {currentSurah.id}
+            </div>
+            <div>
+              <div className="flex items-center space-x-3 mb-1">
+                <h2 className="text-3xl font-serif text-emerald-50">{currentSurah.name_english}</h2>
+                <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20">
+                  Surah {currentSurah.id}
+                </span>
+              </div>
+              <p className="text-emerald-400/60 flex items-center space-x-2">
+                <Music className="w-4 h-4" />
+                <span>Recitation by Sheikh Saud Al-Shuraim</span>
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-5xl font-serif text-emerald-400 mb-2">
+              {currentSurah.name_arabic}
+            </div>
+            <div className="flex items-center justify-end space-x-4">
+              <div className="text-xs text-emerald-500/40 font-mono uppercase tracking-widest">
+                Quran Position: {currentSurah.id} / 114
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Surah List */}
         <div className="flex-1 overflow-y-auto pr-2 pb-32 space-y-2 custom-scrollbar">
             {filteredSurahs.map((surah) => {
               const isActive = currentSurah.id === surah.id;
               return (
-                <motion.button
+                <motion.div
                   key={surah.id}
+                  role="button"
+                  tabIndex={0}
                   whileHover={{ 
                     scale: 1.01, 
                     backgroundColor: 'rgba(6, 78, 59, 0.4)',
@@ -237,7 +275,13 @@ export default function App() {
                   }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => playSurah(surah)}
-                  className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all border group relative overflow-hidden ${
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      playSurah(surah);
+                    }
+                  }}
+                  className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all border group relative overflow-hidden cursor-pointer outline-none focus:ring-2 focus:ring-emerald-500/50 ${
                     isActive 
                       ? 'bg-emerald-900/40 border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.1)]' 
                       : 'bg-emerald-950/20 border-transparent hover:border-emerald-800/30'
@@ -252,10 +296,15 @@ export default function App() {
                     />
                   )}
                   <div className="flex items-center space-x-4 relative z-10">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-mono text-sm transition-all ${
+                    <div className={`w-10 h-10 rounded-full flex flex-col items-center justify-center font-mono text-[10px] transition-all ${
                       isActive ? 'bg-emerald-500 text-emerald-950 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-emerald-900/50 text-emerald-400 group-hover:bg-emerald-800'
                     }`}>
-                      {isActive && isPlaying ? <PlayingAnimation /> : surah.id}
+                      {isActive && isPlaying ? <PlayingAnimation /> : (
+                        <>
+                          <span className="opacity-50 scale-75">NO.</span>
+                          <span className="text-sm font-bold -mt-1">{surah.id}</span>
+                        </>
+                      )}
                     </div>
                     <div className="text-left">
                       <div className="flex items-center space-x-2">
@@ -305,7 +354,7 @@ export default function App() {
                       )}
                     </div>
                   </div>
-                </motion.button>
+                </motion.div>
               );
             })}
           {filteredSurahs.length === 0 && (
@@ -334,7 +383,7 @@ export default function App() {
           )}
           <audio
             ref={audioRef}
-            src={audioSrc}
+            src={audioSrc || undefined}
             onTimeUpdate={handleTimeUpdate}
             onEnded={playNext}
             onLoadedMetadata={handleTimeUpdate}
@@ -343,9 +392,19 @@ export default function App() {
           
           <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
             {/* Current Track Info */}
-            <div className="flex-1 text-center md:text-left w-full">
-              <h2 className="text-xl font-serif text-emerald-300 mb-1">{currentSurah.name_arabic}</h2>
-              <p className="text-sm text-emerald-200/60">{currentSurah.name_english}</p>
+            <div className="flex-1 flex items-center space-x-4 w-full md:w-auto">
+              <div className="hidden sm:flex w-12 h-12 rounded-xl bg-emerald-900/50 border border-emerald-800/50 items-center justify-center text-emerald-400 font-mono text-lg shadow-inner">
+                {currentSurah.id}
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <div className="flex items-center justify-center md:justify-start space-x-2">
+                  <h2 className="text-xl font-serif text-emerald-300">{currentSurah.name_arabic}</h2>
+                  <span className="text-[10px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase tracking-tighter font-bold">
+                    Surah {currentSurah.id}
+                  </span>
+                </div>
+                <p className="text-sm text-emerald-200/60">{currentSurah.name_english}</p>
+              </div>
             </div>
 
             {/* Controls */}
