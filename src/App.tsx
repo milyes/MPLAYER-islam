@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Search, Music, Download, Trash2, CheckCircle, Loader2, ListMusic, Plus, X, GripVertical } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Search, Music, Download, Trash2, CheckCircle, Loader2, ListMusic, Plus, X, GripVertical, Mic, MicOff, ClosedCaption, RotateCcw } from 'lucide-react';
+import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { surahs } from './data/surahs';
 import { isSurahCached, downloadSurah, deleteCachedSurah, getCachedAudioUrl, getAllCachedSurahIds } from './lib/cache';
 
@@ -43,8 +43,13 @@ export default function App() {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [queue, setQueue] = useState<(typeof surahs[0] & { queueId: string })[]>([]);
   const [isQueueOpen, setIsQueueOpen] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [showCC, setShowCC] = useState(false);
+  const [verses, setVerses] = useState<{ number: number, text: string, numberInSurah?: number }[]>([]);
+  const [isLoadingVerses, setIsLoadingVerses] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   const filteredSurahs = surahs.filter(s => {
     const matchesSearch = s.name_arabic.includes(searchQuery) || 
@@ -56,7 +61,63 @@ export default function App() {
   // Initialize downloaded surahs
   useEffect(() => {
     getAllCachedSurahIds().then(ids => setDownloadedSurahs(new Set(ids)));
+
+    // Initialize Speech Recognition
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setSearchQuery(transcript);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
   }, []);
+
+  // Fetch verses for CC
+  useEffect(() => {
+    if (showCC) {
+      const fetchVerses = async () => {
+        setIsLoadingVerses(true);
+        try {
+          const response = await fetch(`https://api.alquran.cloud/v1/surah/${currentSurah.id}`);
+          const data = await response.json();
+          if (data.code === 200) {
+            setVerses(data.data.ayahs);
+          }
+        } catch (error) {
+          console.error("Error fetching verses:", error);
+        } finally {
+          setIsLoadingVerses(false);
+        }
+      };
+      fetchVerses();
+    } else {
+      setVerses([]);
+    }
+  }, [currentSurah.id, showCC]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      recognitionRef.current?.start();
+      setIsListening(true);
+    }
+  };
 
   // Update audio source when current surah changes
   useEffect(() => {
@@ -100,6 +161,13 @@ export default function App() {
 
   const togglePlay = () => setIsPlaying(!isPlaying);
   const toggleMute = () => setIsMuted(!isMuted);
+
+  const skipToBeginning = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      setProgress(0);
+    }
+  };
 
   const handleDownload = async (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
@@ -218,7 +286,7 @@ export default function App() {
 
         {/* Search & Filter */}
         <div className="flex flex-col md:flex-row items-center gap-4 mb-8 max-w-2xl mx-auto w-full">
-          <div className="relative flex-1 w-full">
+          <div className="relative flex-1 w-full flex items-center">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-emerald-500/50" />
             </div>
@@ -227,8 +295,19 @@ export default function App() {
               placeholder="Search Surah..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-emerald-950/30 border border-emerald-800/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-emerald-100 placeholder-emerald-500/50 transition-all backdrop-blur-sm"
+              className="w-full pl-10 pr-12 py-3 bg-emerald-950/30 border border-emerald-800/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-emerald-100 placeholder-emerald-500/50 transition-all backdrop-blur-sm"
             />
+            <button
+              onClick={toggleListening}
+              className={`absolute right-3 p-2 rounded-xl transition-all ${
+                isListening 
+                  ? 'bg-red-500 text-white animate-pulse' 
+                  : 'text-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10'
+              }`}
+              title={isListening ? "Stop Listening" : "Voice Search"}
+            >
+              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            </button>
           </div>
           <button
             onClick={() => setShowDownloadedOnly(!showDownloadedOnly)}
@@ -248,35 +327,71 @@ export default function App() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           key={currentSurah.id}
-          className="mb-8 p-6 rounded-3xl bg-emerald-900/20 border border-emerald-800/30 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6"
+          className="mb-8 p-6 rounded-3xl bg-emerald-900/20 border border-emerald-800/30 backdrop-blur-md flex flex-col items-stretch gap-6"
         >
-          <div className="flex items-center space-x-6">
-            <div className="w-20 h-20 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-3xl font-mono text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
-              {currentSurah.id}
-            </div>
-            <div>
-              <div className="flex items-center space-x-3 mb-1">
-                <h2 className="text-3xl font-serif text-emerald-50">{currentSurah.name_english}</h2>
-                <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20">
-                  Surah {currentSurah.id}
-                </span>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center space-x-6">
+              <div className="w-20 h-20 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-3xl font-mono text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                {currentSurah.id}
               </div>
-              <p className="text-emerald-400/60 flex items-center space-x-2">
-                <Music className="w-4 h-4" />
-                <span>Recitation by Sheikh Saud Al-Shuraim</span>
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-5xl font-serif text-emerald-400 mb-2">
-              {currentSurah.name_arabic}
-            </div>
-            <div className="flex items-center justify-end space-x-4">
-              <div className="text-xs text-emerald-500/40 font-mono uppercase tracking-widest">
-                Quran Position: {currentSurah.id} / 114
+              <div>
+                <div className="flex items-center space-x-3 mb-1">
+                  <h2 className="text-3xl font-serif text-emerald-50">{currentSurah.name_english}</h2>
+                  <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20">
+                    Surah {currentSurah.id}
+                  </span>
+                </div>
+                <p className="text-emerald-400/60 flex items-center space-x-2">
+                  <Music className="w-4 h-4" />
+                  <span>Recitation by Sheikh Saud Al-Shuraim</span>
+                </p>
               </div>
             </div>
+            <div className="text-right">
+              <div className="text-5xl font-serif text-emerald-400 mb-2">
+                {currentSurah.name_arabic}
+              </div>
+              <div className="flex items-center justify-end space-x-4">
+                <div className="text-xs text-emerald-500/40 font-mono uppercase tracking-widest">
+                  Quran Position: {currentSurah.id} / 114
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* CC Module (Verses Display) */}
+          {showCC && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-4 pt-6 border-t border-emerald-800/30"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-emerald-400 text-sm font-medium flex items-center space-x-2">
+                  <ClosedCaption className="w-4 h-4" />
+                  <span>Verses (Arabic)</span>
+                </h3>
+                {isLoadingVerses && <Loader2 className="w-4 h-4 text-emerald-500 animate-spin" />}
+              </div>
+              <div className="max-h-60 overflow-y-auto pr-2 custom-scrollbar space-y-4">
+                {verses.length > 0 ? (
+                  verses.map((ayah) => (
+                    <div key={ayah.number} className="text-right">
+                      <p className="text-2xl font-serif text-emerald-50 leading-relaxed">
+                        {ayah.text}
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-emerald-500/20 text-xs font-mono text-emerald-500/50 mr-2">
+                          {ayah.numberInSurah || ayah.number}
+                        </span>
+                      </p>
+                    </div>
+                  ))
+                ) : !isLoadingVerses && (
+                  <p className="text-center text-emerald-500/30 italic py-4">Loading verses...</p>
+                )}
+              </div>
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Surah List */}
@@ -440,6 +555,14 @@ export default function App() {
             <div className="flex flex-col items-center w-full md:w-auto flex-2">
               <div className="flex items-center space-x-6 mb-3">
                 <button 
+                  onClick={skipToBeginning}
+                  className="text-emerald-400/60 hover:text-emerald-300 transition-colors"
+                  title="Restart Surah"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </button>
+
+                <button 
                   onClick={playPrevious}
                   disabled={currentSurah.id === 1}
                   className="text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-30"
@@ -490,9 +613,21 @@ export default function App() {
               </div>
             </div>
 
-            {/* Volume & Speed & Queue */}
+            {/* Volume & Speed & Queue & CC */}
             <div className="flex flex-1 justify-between md:justify-end items-center w-full md:w-auto space-x-4 md:space-x-6">
               <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setShowCC(!showCC)}
+                  className={`p-2 rounded-xl border transition-all ${
+                    showCC 
+                      ? 'bg-emerald-500 text-emerald-950 border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]' 
+                      : 'bg-emerald-900/40 border-emerald-800/30 text-emerald-400 hover:border-emerald-500/50'
+                  }`}
+                  title="Toggle Closed Captions (Verses)"
+                >
+                  <ClosedCaption className="w-5 h-5" />
+                </button>
+
                 <button
                   onClick={() => setIsQueueOpen(!isQueueOpen)}
                   className={`p-2 rounded-xl border transition-all relative ${
@@ -576,14 +711,19 @@ export default function App() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                  <div className="space-y-3">
-                    <AnimatePresence mode="popLayout">
+                  <Reorder.Group 
+                    axis="y" 
+                    values={queue} 
+                    onReorder={setQueue}
+                    className="space-y-3"
+                  >
+                    <AnimatePresence mode="popLayout" initial={false}>
                       {queue.length === 0 ? (
                         <motion.div
                           key="empty-queue"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
                           className="h-full flex flex-col items-center justify-center text-emerald-500/40 space-y-4 py-20"
                         >
                           <Music className="w-12 h-12 opacity-20" />
@@ -591,27 +731,41 @@ export default function App() {
                         </motion.div>
                       ) : (
                         queue.map((surah, index) => (
-                          <motion.div
-                            layout
+                          <Reorder.Item
                             key={surah.queueId}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20, scale: 0.95 }}
-                            transition={{ 
-                              type: 'spring', 
-                              stiffness: 500, 
-                              damping: 30,
-                              opacity: { duration: 0.2 }
+                            value={surah}
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ 
+                              opacity: 0, 
+                              x: -50, 
+                              filter: "blur(4px)",
+                              transition: { duration: 0.2 } 
                             }}
-                            className="flex items-center justify-between p-3 rounded-xl bg-emerald-900/20 border border-emerald-800/20 group hover:border-emerald-500/30 transition-all"
+                            transition={{ 
+                              layout: {
+                                type: 'spring',
+                                stiffness: 600,
+                                damping: 40
+                              },
+                              opacity: { duration: 0.2 },
+                              scale: { duration: 0.2 }
+                            }}
+                            className="flex items-center justify-between p-3 rounded-xl bg-emerald-900/20 border border-emerald-800/20 group hover:border-emerald-500/30 transition-all shadow-sm cursor-grab active:cursor-grabbing"
                           >
                             <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 rounded-lg bg-emerald-900/50 flex items-center justify-center text-xs font-mono text-emerald-400">
-                                {index + 1}
+                              <div className="text-emerald-500/30 group-hover:text-emerald-500/60 transition-colors">
+                                <GripVertical className="w-4 h-4" />
                               </div>
+                              <motion.div 
+                                layout="position"
+                                className="w-8 h-8 rounded-lg bg-emerald-900/50 flex items-center justify-center text-xs font-mono text-emerald-400"
+                              >
+                                {index + 1}
+                              </motion.div>
                               <div>
-                                <h4 className="text-sm font-medium text-emerald-50">{surah.name_english}</h4>
-                                <p className="text-[10px] text-emerald-400/60 font-serif">{surah.name_arabic}</p>
+                                <motion.h4 layout="position" className="text-sm font-medium text-emerald-50">{surah.name_english}</motion.h4>
+                                <motion.p layout="position" className="text-[10px] text-emerald-400/60 font-serif">{surah.name_arabic}</motion.p>
                               </div>
                             </div>
                             <button 
@@ -620,11 +774,11 @@ export default function App() {
                             >
                               <X className="w-4 h-4" />
                             </button>
-                          </motion.div>
+                          </Reorder.Item>
                         ))
                       )}
                     </AnimatePresence>
-                  </div>
+                  </Reorder.Group>
                 </div>
 
                 {queue.length > 0 && (
