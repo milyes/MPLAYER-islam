@@ -645,26 +645,27 @@ export default function App() {
                   )}
                 </button>
 
-                <div className="flex items-center space-x-2">
-                  <span className="text-[10px] uppercase tracking-widest text-emerald-500/50 font-bold hidden sm:inline">Speed</span>
-                  <div className="relative">
-                    <select 
+                <div className="flex flex-col items-center space-y-1">
+                  <div className="flex items-center justify-between w-full px-1">
+                    <span className="text-[10px] uppercase tracking-widest text-emerald-500/50 font-bold">Speed</span>
+                    <span className="text-[10px] font-mono text-emerald-400">{playbackSpeed.toFixed(2)}x</span>
+                  </div>
+                  <div className="relative w-24 flex items-center h-6 group">
+                    <div className="absolute w-full h-1 bg-emerald-900/30 rounded-full overflow-hidden">
+                      <div 
+                        className="absolute h-full bg-emerald-500/50"
+                        style={{ width: `${((playbackSpeed - 0.5) / 1.5) * 100}%` }}
+                      />
+                    </div>
+                    <input
+                      type="range"
+                      min={0.5}
+                      max={2.0}
+                      step={0.05}
                       value={playbackSpeed}
                       onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
-                      className="bg-emerald-900/40 text-emerald-400 text-xs font-mono py-1 px-2 pr-6 rounded-lg border border-emerald-800/30 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer appearance-none"
-                    >
-                      <option value={0.5}>0.5x</option>
-                      <option value={0.75}>0.75x</option>
-                      <option value={1}>1.0x</option>
-                      <option value={1.25}>1.25x</option>
-                      <option value={1.5}>1.5x</option>
-                      <option value={2}>2.0x</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-1 flex items-center pointer-events-none">
-                      <svg className="w-3 h-3 text-emerald-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
+                      className="absolute w-full h-1 bg-transparent appearance-none cursor-pointer z-10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-emerald-50 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-emerald-500 [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-125"
+                    />
                   </div>
                 </div>
               </div>
