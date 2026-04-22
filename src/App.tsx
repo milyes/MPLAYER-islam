@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Search, Music, Download, Trash2, CheckCircle, Loader2, ListMusic, Plus, X, GripVertical, Mic, MicOff, ClosedCaption, RotateCcw } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Search, Music, Download, Trash2, CheckCircle, Loader2, ListMusic, Plus, X, GripVertical, Mic, MicOff, ClosedCaption, RotateCcw, Bookmark, Library } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { surahs } from './data/surahs';
 import { isSurahCached, downloadSurah, deleteCachedSurah, getCachedAudioUrl, getAllCachedSurahIds } from './lib/cache';
@@ -47,6 +47,8 @@ export default function App() {
   const [showCC, setShowCC] = useState(false);
   const [verses, setVerses] = useState<{ number: number, text: string, numberInSurah?: number }[]>([]);
   const [isLoadingVerses, setIsLoadingVerses] = useState(false);
+  const [bookmarks, setBookmarks] = useState<{ id: string, surahId: number, surahName: string, verseNumber: number, text: string }[]>([]);
+  const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -58,9 +60,18 @@ export default function App() {
     return matchesSearch && matchesFilter;
   });
 
-  // Initialize downloaded surahs
+  // Initialize downloaded surahs and bookmarks
   useEffect(() => {
     getAllCachedSurahIds().then(ids => setDownloadedSurahs(new Set(ids)));
+
+    const savedBookmarks = localStorage.getItem('quran_bookmarks');
+    if (savedBookmarks) {
+      try {
+        setBookmarks(JSON.parse(savedBookmarks));
+      } catch (e) {
+        console.error("Failed to parse bookmarks", e);
+      }
+    }
 
     // Initialize Speech Recognition
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -109,6 +120,10 @@ export default function App() {
       setVerses([]);
     }
   }, [currentSurah.id, showCC]);
+
+  useEffect(() => {
+    localStorage.setItem('quran_bookmarks', JSON.stringify(bookmarks));
+  }, [bookmarks]);
 
   const toggleListening = () => {
     if (isListening) {
@@ -161,6 +176,27 @@ export default function App() {
 
   const togglePlay = () => setIsPlaying(!isPlaying);
   const toggleMute = () => setIsMuted(!isMuted);
+
+  const toggleBookmark = (ayah: { number: number, text: string, numberInSurah?: number }) => {
+    const bookmarkId = `${currentSurah.id}-${ayah.numberInSurah || ayah.number}`;
+    setBookmarks(prev => {
+      const exists = prev.find(b => b.id === bookmarkId);
+      if (exists) {
+        return prev.filter(b => b.id !== bookmarkId);
+      }
+      return [...prev, {
+        id: bookmarkId,
+        surahId: currentSurah.id,
+        surahName: currentSurah.name_english,
+        verseNumber: ayah.numberInSurah || ayah.number,
+        text: ayah.text
+      }];
+    });
+  };
+
+  const isBookmarked = (verseNumber: number) => {
+    return bookmarks.some(b => b.surahId === currentSurah.id && b.verseNumber === verseNumber);
+  };
 
   const skipToBeginning = () => {
     if (audioRef.current) {
@@ -376,16 +412,31 @@ export default function App() {
               </div>
               <div className="max-h-60 overflow-y-auto pr-2 custom-scrollbar space-y-4">
                 {verses.length > 0 ? (
-                  verses.map((ayah) => (
-                    <div key={ayah.number} className="text-right">
-                      <p className="text-2xl font-serif text-emerald-50 leading-relaxed">
-                        {ayah.text}
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-emerald-500/20 text-xs font-mono text-emerald-500/50 mr-2">
-                          {ayah.numberInSurah || ayah.number}
-                        </span>
-                      </p>
-                    </div>
-                  ))
+                  verses.map((ayah) => {
+                    const verseNum = ayah.numberInSurah || ayah.number;
+                    const bookmarked = isBookmarked(verseNum);
+                    return (
+                      <div key={ayah.number} className="text-right group/verse relative">
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 opacity-0 group-hover/verse:opacity-100 transition-opacity">
+                          <button 
+                            onClick={() => toggleBookmark(ayah)}
+                            className={`p-2 rounded-full transition-all ${
+                              bookmarked ? 'text-emerald-400 bg-emerald-500/10' : 'text-emerald-500/30 hover:text-emerald-400 hover:bg-emerald-500/10'
+                            }`}
+                            title={bookmarked ? "Remove Bookmark" : "Add Bookmark"}
+                          >
+                            <Bookmark className="w-4 h-4" fill={bookmarked ? "currentColor" : "none"} />
+                          </button>
+                        </div>
+                        <p className="text-2xl font-serif text-emerald-50 leading-relaxed pl-10">
+                          {ayah.text}
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-emerald-500/20 text-xs font-mono text-emerald-500/50 mr-2">
+                            {verseNum}
+                          </span>
+                        </p>
+                      </div>
+                    );
+                  })
                 ) : !isLoadingVerses && (
                   <p className="text-center text-emerald-500/30 italic py-4">Loading verses...</p>
                 )}
@@ -613,9 +664,26 @@ export default function App() {
               </div>
             </div>
 
-            {/* Volume & Speed & Queue & CC */}
+            {/* Volume & Speed & Queue & CC & Bookmarks */}
             <div className="flex flex-1 justify-between md:justify-end items-center w-full md:w-auto space-x-4 md:space-x-6">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <button
+                  onClick={() => setIsBookmarksOpen(!isBookmarksOpen)}
+                  className={`p-2 rounded-xl border transition-all relative ${
+                    isBookmarksOpen 
+                      ? 'bg-emerald-500 text-emerald-950 border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]' 
+                      : 'bg-emerald-900/40 border-emerald-800/30 text-emerald-400 hover:border-emerald-500/50'
+                  }`}
+                  title="Your Bookmarks"
+                >
+                  <Library className="w-5 h-5" />
+                  {bookmarks.length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 text-emerald-950 text-[10px] font-bold rounded-full flex items-center justify-center border border-emerald-950">
+                      {bookmarks.length}
+                    </span>
+                  )}
+                </button>
+
                 <button
                   onClick={() => setShowCC(!showCC)}
                   className={`p-2 rounded-xl border transition-all ${
@@ -679,6 +747,102 @@ export default function App() {
             </div>
           </div>
         </motion.div>
+
+
+        {/* Bookmarks Panel */}
+        <AnimatePresence>
+          {isBookmarksOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsBookmarksOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+              />
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed top-0 right-0 h-full w-full max-w-md bg-emerald-950 border-l border-emerald-800/50 z-[70] shadow-2xl flex flex-col"
+              >
+                <div className="p-6 border-b border-emerald-800/50 flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Library className="w-6 h-6 text-emerald-400" />
+                    <h2 className="text-xl font-serif text-emerald-50">Verse Bookmarks</h2>
+                  </div>
+                  <button 
+                    onClick={() => setIsBookmarksOpen(false)}
+                    className="p-2 rounded-full hover:bg-emerald-900/50 text-emerald-400 transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                  <div className="space-y-4">
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      {bookmarks.length === 0 ? (
+                        <motion.div
+                          key="empty-bookmarks"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="h-full flex flex-col items-center justify-center text-emerald-500/40 space-y-4 py-20"
+                        >
+                          <Bookmark className="w-12 h-12 opacity-20" />
+                          <p className="text-center">No bookmarks yet.<br/>Tap the bookmark icon on any verse.</p>
+                        </motion.div>
+                      ) : (
+                        bookmarks.map((bookmark) => (
+                          <motion.div
+                            layout
+                            key={bookmark.id}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            className="p-4 rounded-2xl bg-emerald-900/20 border border-emerald-800/20 hover:border-emerald-500/30 transition-all cursor-pointer group"
+                            onClick={() => {
+                              const surah = surahs.find(s => s.id === bookmark.surahId);
+                              if (surah) {
+                                playSurah(surah);
+                                setShowCC(true);
+                                setIsBookmarksOpen(false);
+                              }
+                            }}
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs font-mono text-emerald-500/60">Surah {bookmark.surahId}</span>
+                                <h4 className="text-sm font-medium text-emerald-400">{bookmark.surahName}</h4>
+                              </div>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setBookmarks(prev => prev.filter(b => b.id !== bookmark.id));
+                                }}
+                                className="p-1.5 rounded-lg text-emerald-500/20 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <p className="text-right text-lg font-serif text-emerald-50 leading-relaxed">
+                              {bookmark.text}
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-emerald-500/20 text-[10px] font-mono text-emerald-500/50 mr-2">
+                                {bookmark.verseNumber}
+                              </span>
+                            </p>
+                          </motion.div>
+                        ))
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Queue Panel */}
         <AnimatePresence>
