@@ -1,1 +1,82 @@
 @import "tailwindcss";
+
+:root {
+  --app-bg: #0a0f0d;
+  --theme-primary-50: #ecfdf5;
+  --theme-primary-100: #d1fae5;
+  --theme-primary-200: #a7f3d0;
+  --theme-primary-300: #6ee7b7;
+  --theme-primary-400: #34d399;
+  --theme-primary-500: #10b981;
+  --theme-primary-600: #059669;
+  --theme-primary-700: #047857;
+  --theme-primary-800: #065f46;
+  --theme-primary-900: #064e3b;
+  --theme-primary-950: #022c22;
+  
+  --theme-secondary-900: #134e4a;
+}
+
+[data-theme="mythos"] {
+  --app-bg: #050308;
+  --theme-primary-50: #fdfbf7;
+  --theme-primary-100: #f8f1e3;
+  --theme-primary-200: #eedeb9;
+  --theme-primary-300: #e1c586;
+  --theme-primary-400: #d1a84f;
+  --theme-primary-500: #bf8b31;
+  --theme-primary-600: #a46d27;
+  --theme-primary-700: #835222;
+  --theme-primary-800: #6e4221;
+  --theme-primary-900: #59351e;
+  --theme-primary-950: #29180c;
+  
+  --theme-secondary-900: #2d1b4e;
+}
+
+@theme {
+  --color-app-bg: var(--app-bg);
+  
+  --color-emerald-50: var(--theme-primary-50);
+  --color-emerald-100: var(--theme-primary-100);
+  --color-emerald-200: var(--theme-primary-200);
+  --color-emerald-300: var(--theme-primary-300);
+  --color-emerald-400: var(--theme-primary-400);
+  --color-emerald-500: var(--theme-primary-500);
+  --color-emerald-600: var(--theme-primary-600);
+  --color-emerald-700: var(--theme-primary-700);
+  --color-emerald-800: var(--theme-primary-800);
+  --color-emerald-900: var(--theme-primary-900);
+  --color-emerald-950: var(--theme-primary-950);
+  
+  --color-teal-900: var(--theme-secondary-900);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--theme-primary-800);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-primary-600);
+}
+
