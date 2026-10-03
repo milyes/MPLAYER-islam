@@ -9,7 +9,8 @@ import {
   Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Search, Music, Download, 
   Trash2, Loader2, ListMusic, Plus, X, GripVertical, Mic, MicOff, 
   ClosedCaption, RotateCcw, Bookmark, Library, GraduationCap, Square,
-  ChevronUp, ChevronDown, BookOpen, SlidersHorizontal
+  ChevronUp, ChevronDown, BookOpen, SlidersHorizontal, Sliders, Settings,
+  HardDrive, FileCode, Database, Check, Copy, ExternalLink, RefreshCw, Upload, Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { surahs } from './data/surahs';
@@ -49,6 +50,10 @@ const t = {
     openPlayer: "Open Player",
     fullPlayer: "Full Player",
     dragToReorder: "Drag to reorder",
+    studioEditor: "Studio Editor",
+    driveStore: "Drive Store",
+    exportBin: "Export BIN_HTML",
+    sahbiAi: "SAHBI SA AI23",
   },
   fr: {
     appTitle: "Le Saint Coran",
@@ -81,6 +86,10 @@ const t = {
     openPlayer: "Ouvrir le lecteur",
     fullPlayer: "Lecteur Complet",
     dragToReorder: "Glisser pour réorganiser",
+    studioEditor: "Éditeur Studio",
+    driveStore: "Stockage Drive",
+    exportBin: "Exporter BIN_HTML",
+    sahbiAi: "SAHBI SA AI23",
   },
   ar: {
     appTitle: "القرآن الكريم",
@@ -113,6 +122,10 @@ const t = {
     openPlayer: "فتح المشغل",
     fullPlayer: "المشغل الكامل",
     dragToReorder: "اسحب لإعادة الترتيب",
+    studioEditor: "محرر الاستوديو",
+    driveStore: "مخزن درايف",
+    exportBin: "تصدير BIN_HTML",
+    sahbiAi: "صحبي ش.م AI23",
   }
 };
 
@@ -168,7 +181,22 @@ export default function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
   const [isMobilePlayerOpen, setIsMobilePlayerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'surahs' | 'bookmarks' | 'queue' | 'training'>('surahs');
+  const [activeTab, setActiveTab] = useState<'surahs' | 'bookmarks' | 'queue' | 'training' | 'studio'>('surahs');
+  
+  // Studio Editor & Drive Store State
+  const [isStudioOpen, setIsStudioOpen] = useState(false);
+  const [studioTab, setStudioTab] = useState<'editor' | 'export' | 'drivestore' | 'ai23'>('editor');
+  const [customCdnUrl, setCustomCdnUrl] = useState<string>('https://server7.mp3quran.net/shur/');
+  const [reciterName, setReciterName] = useState<string>('Sheikh Saud Al-Shuraim');
+  const [audioQuality, setAudioQuality] = useState<string>('128k');
+  const [autoCacheOnPlay, setAutoCacheOnPlay] = useState<boolean>(false);
+  const [driveStoreSavedTime, setDriveStoreSavedTime] = useState<string>('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
   
   const audioRef = useRef<HTMLAudioElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -199,6 +227,18 @@ export default function App() {
     if (savedTheme === 'mythos' || savedTheme === 'emerald') {
       setTheme(savedTheme);
     }
+
+    // Initialize Studio Editor & Drive Store Settings
+    const savedCdn = localStorage.getItem('quran_studio_cdn');
+    if (savedCdn) setCustomCdnUrl(savedCdn);
+    const savedReciter = localStorage.getItem('quran_studio_reciter');
+    if (savedReciter) setReciterName(savedReciter);
+    const savedQuality = localStorage.getItem('quran_studio_quality');
+    if (savedQuality) setAudioQuality(savedQuality);
+    const savedAutoCache = localStorage.getItem('quran_studio_autocache');
+    if (savedAutoCache) setAutoCacheOnPlay(savedAutoCache === 'true');
+    const savedTime = localStorage.getItem('quran_drivestore_time');
+    if (savedTime) setDriveStoreSavedTime(savedTime);
 
     // Initialize Speech Recognition
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -285,11 +325,152 @@ export default function App() {
         setAudioSrc(cachedUrl);
       } else {
         const paddedId = currentSurah.id.toString().padStart(3, '0');
-        setAudioSrc(`https://server7.mp3quran.net/shur/${paddedId}.mp3`);
+        const baseUrl = customCdnUrl.endsWith('/') ? customCdnUrl : `${customCdnUrl}/`;
+        setAudioSrc(`${baseUrl}${paddedId}.mp3`);
+
+        if (autoCacheOnPlay && !downloadedSurahs.has(currentSurah.id)) {
+          downloadSurah(currentSurah.id).then(() => {
+            setDownloadedSurahs(prev => new Set(prev).add(currentSurah.id));
+          }).catch(console.error);
+        }
       }
     };
     updateAudioSrc();
-  }, [currentSurah.id]);
+  }, [currentSurah.id, customCdnUrl, autoCacheOnPlay]);
+
+  // Studio Settings Persistence
+  const saveStudioSettings = () => {
+    localStorage.setItem('quran_studio_cdn', customCdnUrl);
+    localStorage.setItem('quran_studio_reciter', reciterName);
+    localStorage.setItem('quran_studio_quality', audioQuality);
+    localStorage.setItem('quran_studio_autocache', String(autoCacheOnPlay));
+    showToast('Paramètres du Studio enregistrés avec succès !');
+  };
+
+  // Export BIN_HTML.LANCER handlers
+  const handleExportBinHtml = async () => {
+    try {
+      showToast('Génération du fichier BIN_HTML.LANCER.html...');
+      const response = await fetch('/Lancer_bin.html');
+      let htmlText = '';
+      if (response.ok) {
+        htmlText = await response.text();
+      } else {
+        htmlText = document.documentElement.outerHTML;
+      }
+      const blob = new Blob([htmlText], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'BIN_HTML.LANCER.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Export BIN_HTML.LANCER terminé !');
+    } catch (e) {
+      console.error(e);
+      showToast('Erreur lors de l\'exportation');
+    }
+  };
+
+  const handleCopyBinHtml = async () => {
+    try {
+      const response = await fetch('/Lancer_bin.html');
+      const text = response.ok ? await response.text() : document.documentElement.outerHTML;
+      await navigator.clipboard.writeText(text);
+      showToast('Code BIN_HTML copié dans le presse-papiers !');
+    } catch (e) {
+      console.error(e);
+      showToast('Impossible de copier dans le presse-papiers');
+    }
+  };
+
+  // Drive Store Local Backup & Cloud Persistence
+  const handleDriveStoreSave = () => {
+    const backup = {
+      version: 'SAHBI-SA-AI23-v2.0',
+      savedAt: new Date().toISOString(),
+      reciter: reciterName,
+      cdn: customCdnUrl,
+      quality: audioQuality,
+      theme,
+      lang,
+      bookmarks,
+      queue: queue.map(q => ({ id: q.id, name_english: q.name_english, name_arabic: q.name_arabic })),
+      cachedSurahsCount: downloadedSurahs.size,
+    };
+    localStorage.setItem('quran_drivestore_backup', JSON.stringify(backup));
+    const nowStr = new Date().toLocaleTimeString();
+    localStorage.setItem('quran_drivestore_time', nowStr);
+    setDriveStoreSavedTime(nowStr);
+    showToast(`Drive Store synchronisé à ${nowStr}`);
+  };
+
+  const handleDriveStoreExport = () => {
+    const backup = {
+      app: 'MPLAYER-ISLAM · SAHBI S.A.',
+      version: 'AI23-STUDIO-v2',
+      exportedAt: new Date().toISOString(),
+      bookmarks,
+      theme,
+      lang,
+      customCdnUrl,
+      reciterName,
+      audioQuality,
+      cachedSurahs: Array.from(downloadedSurahs)
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `quran_drive_store_backup_${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Fichier Drive Store JSON téléchargé');
+  };
+
+  const handleDriveStoreRestore = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result as string;
+        const parsed = JSON.parse(content);
+        if (parsed.bookmarks) {
+          setBookmarks(parsed.bookmarks);
+          localStorage.setItem('quran_bookmarks', JSON.stringify(parsed.bookmarks));
+        }
+        if (parsed.theme) setTheme(parsed.theme);
+        if (parsed.customCdnUrl) setCustomCdnUrl(parsed.customCdnUrl);
+        if (parsed.reciterName) setReciterName(parsed.reciterName);
+        if (parsed.audioQuality) setAudioQuality(parsed.audioQuality);
+        showToast('Restauration Drive Store réussie !');
+      } catch (err) {
+        console.error(err);
+        showToast('Erreur : fichier JSON invalide');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleClearDriveStore = async () => {
+    if (confirm('Voulez-vous vraiment vider tout le cache et réinitialiser le Drive Store ?')) {
+      for (const id of downloadedSurahs) {
+        await deleteCachedSurah(id);
+      }
+      setDownloadedSurahs(new Set());
+      setBookmarks([]);
+      localStorage.removeItem('quran_bookmarks');
+      localStorage.removeItem('quran_drivestore_backup');
+      localStorage.removeItem('quran_drivestore_time');
+      setDriveStoreSavedTime('');
+      showToast('Cache et Drive Store réinitialisés');
+    }
+  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -540,6 +721,38 @@ export default function App() {
               title="Toggle Mythos / Emerald Theme"
             >
               <span>{theme === 'emerald' ? 'Mythos' : 'Emerald'}</span>
+            </button>
+
+            {/* Studio Editor & Export button */}
+            <button
+              onClick={() => {
+                setStudioTab('editor');
+                setIsStudioOpen(true);
+                setIsBookmarksOpen(false);
+                setIsQueueOpen(false);
+                setIsTrainingOpen(false);
+              }}
+              className="min-h-[36px] px-2.5 py-1 rounded-xl text-xs font-bold tracking-wider transition-all border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 hover:border-emerald-400 flex items-center space-x-1.5 shadow-sm"
+              title="Studio Editor & Export"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Studio</span>
+            </button>
+
+            {/* Drive Store button */}
+            <button
+              onClick={() => {
+                setStudioTab('drivestore');
+                setIsStudioOpen(true);
+                setIsBookmarksOpen(false);
+                setIsQueueOpen(false);
+                setIsTrainingOpen(false);
+              }}
+              className="min-h-[36px] px-2.5 py-1 rounded-xl text-xs font-bold tracking-wider transition-all border border-emerald-800/40 bg-emerald-950/60 text-emerald-400/80 hover:text-emerald-300 hover:border-emerald-500/40 flex items-center space-x-1"
+              title="Drive Store Storage"
+            >
+              <HardDrive className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Drive</span>
             </button>
 
             {/* SAHBI S.A. Lancer_bin.html launcher button */}
@@ -978,6 +1191,22 @@ export default function App() {
         >
           <GraduationCap className="w-5 h-5 mb-0.5" />
           <span className="text-[10px] font-medium tracking-tight">{t[lang].voiceTraining}</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab('studio');
+            setIsStudioOpen(true);
+            setIsBookmarksOpen(false);
+            setIsQueueOpen(false);
+            setIsTrainingOpen(false);
+          }}
+          className={`min-h-[48px] flex-1 flex flex-col items-center justify-center transition-colors ${
+            isStudioOpen ? 'text-emerald-400' : 'text-emerald-500/50 hover:text-emerald-400'
+          }`}
+        >
+          <Sliders className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px] font-medium tracking-tight">Studio</span>
         </button>
       </nav>
 
@@ -1689,6 +1918,387 @@ export default function App() {
               )}
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* ========================================================================= */}
+      {/* STUDIO EDITOR & DRIVE STORE & EXPORT BIN_HTML MODAL                        */}
+      {/* ========================================================================= */}
+      <AnimatePresence>
+        {isStudioOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsStudioOpen(false)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-md z-[80]"
+            />
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-x-4 top-[5%] bottom-[5%] md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-2xl bg-emerald-950/95 border border-emerald-700/50 rounded-3xl shadow-2xl z-[90] flex flex-col overflow-hidden text-emerald-50 backdrop-blur-xl"
+            >
+              {/* Modal Header */}
+              <div className="p-4 md:p-6 border-b border-emerald-800/60 flex items-center justify-between bg-emerald-900/40">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300">
+                    <Sliders className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base md:text-lg font-bold text-emerald-100 flex items-center gap-2">
+                      <span>SAHBI S.A. · Studio Editor</span>
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-mono">AI23</span>
+                    </h3>
+                    <p className="text-xs text-emerald-400/70 font-mono">Bouton Export BIN_HTML.LANCER & Drive Store</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsStudioOpen(false)}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center bg-emerald-900/60 text-emerald-400/80 hover:text-emerald-200 hover:bg-emerald-800/60 transition-all border border-emerald-800/40"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Tab Navigation */}
+              <div className="flex border-b border-emerald-800/50 bg-emerald-950/60 px-4 pt-2 gap-1 overflow-x-auto">
+                <button
+                  onClick={() => setStudioTab('editor')}
+                  className={`min-h-[40px] px-3.5 py-2 rounded-t-xl text-xs font-semibold flex items-center space-x-2 transition-all border-b-2 ${
+                    studioTab === 'editor'
+                      ? 'border-emerald-400 text-emerald-300 bg-emerald-900/30'
+                      : 'border-transparent text-emerald-400/60 hover:text-emerald-300'
+                  }`}
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  <span>Studio Editor</span>
+                </button>
+                <button
+                  onClick={() => setStudioTab('export')}
+                  className={`min-h-[40px] px-3.5 py-2 rounded-t-xl text-xs font-semibold flex items-center space-x-2 transition-all border-b-2 ${
+                    studioTab === 'export'
+                      ? 'border-emerald-400 text-emerald-300 bg-emerald-900/30'
+                      : 'border-transparent text-emerald-400/60 hover:text-emerald-300'
+                  }`}
+                >
+                  <FileCode className="w-3.5 h-3.5" />
+                  <span>Export BIN_HTML</span>
+                </button>
+                <button
+                  onClick={() => setStudioTab('drivestore')}
+                  className={`min-h-[40px] px-3.5 py-2 rounded-t-xl text-xs font-semibold flex items-center space-x-2 transition-all border-b-2 ${
+                    studioTab === 'drivestore'
+                      ? 'border-emerald-400 text-emerald-300 bg-emerald-900/30'
+                      : 'border-transparent text-emerald-400/60 hover:text-emerald-300'
+                  }`}
+                >
+                  <HardDrive className="w-3.5 h-3.5" />
+                  <span>Drive Store</span>
+                </button>
+                <button
+                  onClick={() => setStudioTab('ai23')}
+                  className={`min-h-[40px] px-3.5 py-2 rounded-t-xl text-xs font-semibold flex items-center space-x-2 transition-all border-b-2 ${
+                    studioTab === 'ai23'
+                      ? 'border-emerald-400 text-emerald-300 bg-emerald-900/30'
+                      : 'border-transparent text-emerald-400/60 hover:text-emerald-300'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>SAHBI SA AI23</span>
+                </button>
+              </div>
+
+              {/* Tab Contents */}
+              <div className="flex-1 overflow-y-auto p-5 md:p-6 space-y-6">
+                {/* TAB 1: STUDIO EDITOR */}
+                {studioTab === 'editor' && (
+                  <div className="space-y-5">
+                    <div className="bg-emerald-900/20 border border-emerald-800/40 rounded-2xl p-4 space-y-4">
+                      <h4 className="text-sm font-semibold text-emerald-300 flex items-center gap-2">
+                        <SlidersHorizontal className="w-4 h-4 text-emerald-400" />
+                        <span>Paramètres Audio & Récitateur</span>
+                      </h4>
+
+                      <div>
+                        <label className="text-xs text-emerald-400/80 block mb-1.5 font-medium">Nom du Récitateur</label>
+                        <input
+                          type="text"
+                          value={reciterName}
+                          onChange={(e) => setReciterName(e.target.value)}
+                          className="w-full bg-emerald-950/80 border border-emerald-800/60 rounded-xl px-3 py-2 text-sm text-emerald-100 focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-emerald-400/80 block mb-1.5 font-medium">Qualité Audio (Bitrate)</label>
+                          <select
+                            value={audioQuality}
+                            onChange={(e) => setAudioQuality(e.target.value)}
+                            className="w-full bg-emerald-950/80 border border-emerald-800/60 rounded-xl px-3 py-2 text-sm text-emerald-100 focus:outline-none focus:border-emerald-500"
+                          >
+                            <option value="64k">64 kbps (Économie)</option>
+                            <option value="128k">128 kbps (Standard MP3)</option>
+                            <option value="192k">192 kbps (Haute Définition)</option>
+                            <option value="320k">320 kbps (Studio Master)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-emerald-400/80 block mb-1.5 font-medium">Thème Visuel</label>
+                          <select
+                            value={theme}
+                            onChange={(e) => setTheme(e.target.value as 'emerald' | 'mythos')}
+                            className="w-full bg-emerald-950/80 border border-emerald-800/60 rounded-xl px-3 py-2 text-sm text-emerald-100 focus:outline-none focus:border-emerald-500"
+                          >
+                            <option value="emerald">Emerald (Vert Émeraude)</option>
+                            <option value="mythos">Mythos (Noir & Or Céleste)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-emerald-400/80 block mb-1.5 font-medium">URL Serveur / CDN Audio personnalisé</label>
+                        <input
+                          type="text"
+                          value={customCdnUrl}
+                          onChange={(e) => setCustomCdnUrl(e.target.value)}
+                          placeholder="https://server7.mp3quran.net/shur/"
+                          className="w-full bg-emerald-950/80 border border-emerald-800/60 rounded-xl px-3 py-2 text-sm font-mono text-emerald-300 focus:outline-none focus:border-emerald-500"
+                        />
+                        <p className="text-[11px] text-emerald-400/60 mt-1">Exemple: https://server7.mp3quran.net/shur/ (suffixé par 001.mp3 à 114.mp3)</p>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2">
+                        <div>
+                          <span className="text-sm font-medium text-emerald-200 block">Mise en cache automatique à la lecture</span>
+                          <span className="text-xs text-emerald-400/60">Télécharge automatiquement la sourate en local dès qu'elle est jouée</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={autoCacheOnPlay}
+                          onChange={(e) => setAutoCacheOnPlay(e.target.checked)}
+                          className="w-5 h-5 accent-emerald-500 rounded cursor-pointer"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={saveStudioSettings}
+                        className="flex-1 min-h-[46px] rounded-xl bg-emerald-500 text-emerald-950 font-bold hover:bg-emerald-400 active:scale-98 transition-all flex items-center justify-center space-x-2"
+                      >
+                        <Check className="w-4 h-4" />
+                        <span>Enregistrer les Paramètres Studio</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setCustomCdnUrl('https://server7.mp3quran.net/shur/');
+                          setReciterName('Sheikh Saud Al-Shuraim');
+                          setAudioQuality('128k');
+                          setAutoCacheOnPlay(false);
+                          showToast('Paramètres réinitialisés par défaut');
+                        }}
+                        className="min-h-[46px] px-4 rounded-xl border border-emerald-800/60 bg-emerald-950/60 text-emerald-400 hover:text-emerald-200 transition-all text-xs font-semibold"
+                      >
+                        Réinitialiser
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 2: EXPORT BIN_HTML.LANCER */}
+                {studioTab === 'export' && (
+                  <div className="space-y-5">
+                    <div className="bg-gradient-to-br from-emerald-900/40 to-teal-900/20 border border-emerald-500/30 rounded-2xl p-5 space-y-3">
+                      <div className="flex items-center space-x-2.5 text-emerald-300">
+                        <FileCode className="w-5 h-5" />
+                        <h4 className="text-base font-bold">Exportateur Binaire HTML (Lancer_bin.html)</h4>
+                      </div>
+                      <p className="text-xs md:text-sm text-emerald-200/80 leading-relaxed">
+                        Le fichier autonome <strong>BIN_HTML.LANCER.html</strong> inclut l'intégralité du lecteur, des 114 sourates, du cache hors-ligne, de l'audio haute-fidélité, du Drive Store et de l'interface mobile sans dépendance externe requise.
+                      </p>
+
+                      <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                        <button
+                          onClick={handleExportBinHtml}
+                          className="flex-1 min-h-[48px] rounded-xl bg-emerald-400 text-emerald-950 font-bold hover:bg-emerald-300 active:scale-98 transition-all flex items-center justify-center space-x-2 shadow-lg shadow-emerald-950/50"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>Télécharger BIN_HTML.LANCER.html</span>
+                        </button>
+                        <button
+                          onClick={handleCopyBinHtml}
+                          className="min-h-[48px] px-4 rounded-xl border border-emerald-600/40 bg-emerald-900/60 text-emerald-300 hover:bg-emerald-900/80 transition-all text-xs font-semibold flex items-center justify-center space-x-1.5"
+                        >
+                          <Copy className="w-4 h-4" />
+                          <span>Copier HTML</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-emerald-900/20 border border-emerald-800/40 rounded-2xl p-4 space-y-3">
+                      <h5 className="text-xs font-semibold text-emerald-300 uppercase tracking-wider">Lanceurs & Fichiers Compagnons</h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <a
+                          href="/Lancer_bin.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-800/50 flex items-center justify-between text-emerald-300 hover:border-emerald-500/50 hover:bg-emerald-900/30 transition-all"
+                        >
+                          <span className="font-mono font-medium">/Lancer_bin.html</span>
+                          <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+                        </a>
+                        <a
+                          href="/Lancer_bin.html#mobile"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-800/50 flex items-center justify-between text-emerald-300 hover:border-emerald-500/50 hover:bg-emerald-900/30 transition-all"
+                        >
+                          <span className="font-mono font-medium">Form Mobile Launcher</span>
+                          <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 3: DRIVE STORE */}
+                {studioTab === 'drivestore' && (
+                  <div className="space-y-5">
+                    <div className="bg-emerald-900/20 border border-emerald-800/40 rounded-2xl p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-semibold text-emerald-300 flex items-center gap-2">
+                          <Database className="w-4 h-4 text-emerald-400" />
+                          <span>Statut du Drive Store</span>
+                        </h4>
+                        {driveStoreSavedTime && (
+                          <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-mono">
+                            Dernière synchro : {driveStoreSavedTime}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                        <div className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-800/50">
+                          <div className="text-lg font-bold text-emerald-400">{downloadedSurahs.size}</div>
+                          <div className="text-[10px] text-emerald-500/70 uppercase">Sourates en Cache</div>
+                        </div>
+                        <div className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-800/50">
+                          <div className="text-lg font-bold text-emerald-400">{bookmarks.length}</div>
+                          <div className="text-[10px] text-emerald-500/70 uppercase">Favoris Sauvegardés</div>
+                        </div>
+                        <div className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-800/50">
+                          <div className="text-lg font-bold text-emerald-400">{queue.length}</div>
+                          <div className="text-[10px] text-emerald-500/70 uppercase">File d'Attente</div>
+                        </div>
+                        <div className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-800/50">
+                          <div className="text-lg font-bold text-emerald-400">{theme.toUpperCase()}</div>
+                          <div className="text-[10px] text-emerald-500/70 uppercase">Thème Actif</div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 flex flex-col gap-2.5">
+                        <button
+                          onClick={handleDriveStoreSave}
+                          className="w-full min-h-[46px] rounded-xl bg-emerald-500 text-emerald-950 font-bold hover:bg-emerald-400 transition-all flex items-center justify-center space-x-2"
+                        >
+                          <HardDrive className="w-4 h-4" />
+                          <span>Synchroniser & Sauvegarder dans le Drive Store</span>
+                        </button>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleDriveStoreExport}
+                            className="flex-1 min-h-[42px] rounded-xl border border-emerald-700/60 bg-emerald-900/50 text-emerald-200 hover:bg-emerald-900/80 transition-all text-xs font-semibold flex items-center justify-center space-x-1.5"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            <span>Exporter Sauvegarde (JSON)</span>
+                          </button>
+
+                          <label className="flex-1 min-h-[42px] rounded-xl border border-emerald-700/60 bg-emerald-900/50 text-emerald-200 hover:bg-emerald-900/80 transition-all text-xs font-semibold flex items-center justify-center space-x-1.5 cursor-pointer">
+                            <Upload className="w-3.5 h-3.5" />
+                            <span>Restaurer (JSON)</span>
+                            <input
+                              type="file"
+                              accept=".json"
+                              onChange={handleDriveStoreRestore}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <button
+                        onClick={handleClearDriveStore}
+                        className="w-full min-h-[40px] rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all text-xs font-medium"
+                      >
+                        Vider tout le cache et réinitialiser le Drive Store
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 4: SAHBI SA AI23 */}
+                {studioTab === 'ai23' && (
+                  <div className="space-y-4">
+                    <div className="bg-emerald-900/20 border border-emerald-800/40 rounded-2xl p-4 space-y-3">
+                      <div className="flex items-center space-x-2 text-emerald-300">
+                        <Sparkles className="w-4 h-4 text-emerald-400" />
+                        <h4 className="text-sm font-bold">SAHBI S.A. AI23 Recitation Core</h4>
+                      </div>
+                      <p className="text-xs text-emerald-200/80 leading-relaxed font-mono">
+                        IA_LOGIC_SIGNATURE: ZOUBIROU-IA-2025<br />
+                        LICENSE: NETSECUREPRO.CA · GEMIN CORE V7 PRO FINAL<br />
+                        FRAMEWORK: MPLAYER-ISLAM · 114 SURAHS
+                      </p>
+                    </div>
+
+                    <div className="bg-emerald-950/80 border border-emerald-800/50 rounded-2xl p-4 space-y-2">
+                      <h5 className="text-xs font-semibold text-emerald-300">Capacités & Modules Actifs</h5>
+                      <ul className="text-xs text-emerald-300/80 space-y-1.5 list-disc list-inside">
+                        <li>Reconnaissance vocale multilingue (Arabe, Français, Anglais)</li>
+                        <li>Entraînement et enregistrement vocal en temps réel</li>
+                        <li>Sous-titres & affichage verset par verset (API AlQuran Cloud)</li>
+                        <li>Cache binaire local & persistance Drive Store (IndexedDB + Storage)</li>
+                        <li>Exportateur binaire HTML tout-en-un autonome (Lancer_bin.html)</li>
+                      </ul>
+                    </div>
+
+                    <div className="p-3 bg-emerald-900/30 rounded-xl border border-emerald-500/30 text-center">
+                      <span className="text-xs text-emerald-300 font-semibold block mb-1">Formulaire Mobile Optimisé</span>
+                      <a 
+                        href="/Lancer_bin.html" 
+                        className="inline-block px-4 py-2 bg-emerald-500 text-emerald-950 text-xs font-bold rounded-lg hover:bg-emerald-400 transition-colors"
+                      >
+                        Ouvrir Lancer_bin.html Binaire
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-24 md:bottom-28 left-1/2 -translate-x-1/2 z-[100] bg-emerald-900/90 text-emerald-100 border border-emerald-500/40 px-4 py-2.5 rounded-2xl shadow-xl text-xs font-semibold flex items-center space-x-2 backdrop-blur-lg"
+          >
+            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{toastMessage}</span>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

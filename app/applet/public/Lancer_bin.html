@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="emerald">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <!-- LICENSE NETSECUREPRO.CA et GEMIN CORE V7 PRO FINAL, IA_LOGIC_SINGNATURE:ZOUBIROU-IA-2025 -->
+  <!-- ENTITY: SAHBI S.A. / SAHBI SA -->
+  <meta name="author" content="SAHBI S.A. · MOHAMMED ILYES ZOUBIROU" />
+  <meta name="license" content="NETSECUREPRO.CA" />
+  <meta name="core-version" content="GEMIN CORE V7 PRO FINAL" />
+  <meta name="ia-logic-signature" content="ZOUBIROU-IA-2025" />
+  <title>SAHBI S.A. — Lancer_bin.html | Studio Editor & Drive Store</title>
+  <style>
+    :root {
+      --bg: #0a0f0d;
+      --card-bg: rgba(6, 78, 59, 0.25);
+      --card-border: rgba(16, 185, 129, 0.3);
+      --text-primary: #ecfdf5;
+      --text-muted: rgba(167, 243, 208, 0.7);
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.4);
+      --accent-dark: #064e3b;
+      --gold: #d1a84f;
+      --gold-border: rgba(209, 168, 79, 0.4);
+      --gold-bg: rgba(41, 24, 12, 0.45);
+      --blue: #38bdf8;
+      --blue-border: rgba(56, 189, 248, 0.4);
+    }
+    [data-theme="mythos"] {
+      --bg: #050308;
+      --card-bg: rgba(41, 24, 12, 0.35);
+      --card-border: rgba(209, 168, 79, 0.3);
+      --text-primary: #fdfbf7;
+      --text-muted: rgba(238, 222, 185, 0.7);
+      --accent: #d1a84f;
+      --accent-glow: rgba(209, 168, 79, 0.4);
+      --accent-dark: #2d1b4e;
+      --gold: #f8f1e3;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    .atmosphere {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .blob-1 {
+      position: absolute;
+      top: -15%;
+      left: -15%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      filter: blur(60px);
+      opacity: 0.5;
+    }
+    .blob-2 {
+      position: absolute;
+      bottom: -15%;
+      right: -15%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      filter: blur(60px);
+      opacity: 0.3;
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 3rem 1rem;
+      width: 100%;
+      flex: 1;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-dark), var(--bg));
+      border: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: var(--accent);
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--text-primary);
+    }
+    .brand-sub {
+      font-size: 0.7rem;
+      color: var(--accent);
+      font-family: monospace;
+      letter-spacing: 0.06em;
+    }
+    .header-actions {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn-toggle {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-primary);
+      padding: 0.45rem 0.75rem;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: monospace;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .btn-toggle:hover {
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.2);
+      transform: translateY(-1px);
+    }
+    .btn-studio {
+      border-color: var(--gold-border);
+      color: var(--gold);
+      background: var(--gold-bg);
+    }
+    .btn-studio:hover {
+      border-color: var(--gold);
+      background: rgba(209, 168, 79, 0.25);
+    }
+    .btn-export {
+      border-color: var(--card-border);
+      color: #a7f3d0;
+      background: rgba(6, 78, 59, 0.5);
+    }
+    .btn-drive {
+      border-color: var(--blue-border);
+      color: var(--blue);
+      background: rgba(56, 189, 248, 0.15);
+    }
+    .btn-drive:hover {
+      border-color: var(--blue);
+      background: rgba(56, 189, 248, 0.25);
+    }
+
+    .banner {
+      background: linear-gradient(180deg, var(--card-bg) 0%, rgba(6, 78, 59, 0.05) 100%);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .banner-tag {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      font-family: monospace;
+    }
+    .banner h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+    .banner p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 1.5rem auto;
+    }
+    .launch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .btn-launch, .btn-secondary, .btn-studio-action, .btn-export-action, .btn-drive-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      font-family: inherit;
+    }
+    .btn-launch {
+      background: var(--accent);
+      color: #064e3b;
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+    .btn-launch:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px var(--accent-glow);
+      filter: brightness(1.1);
+    }
+    .btn-secondary {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-primary);
+    }
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.2);
+      transform: translateY(-2px);
+    }
+    .btn-studio-action {
+      background: var(--gold-bg);
+      border: 1px solid var(--gold-border);
+      color: var(--gold);
+    }
+    .btn-studio-action:hover {
+      border-color: var(--gold);
+      background: rgba(209, 168, 79, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(209, 168, 79, 0.3);
+    }
+    .btn-export-action {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--accent);
+      color: #6ee7b7;
+    }
+    .btn-export-action:hover {
+      background: rgba(16, 185, 129, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+    .btn-drive-action {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid var(--blue-border);
+      color: var(--blue);
+    }
+    .btn-drive-action:hover {
+      border-color: var(--blue);
+      background: rgba(56, 189, 248, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+    }
+
+    /* Modal / Drawer */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-card {
+      background: #061c14;
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 720px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-glow);
+      display: flex;
+      flex-direction: column;
+    }
+    [data-theme="mythos"] .modal-card {
+      background: #140d1e;
+      border-color: var(--gold-border);
+    }
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .modal-subtitle {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-family: monospace;
+      margin-top: 0.2rem;
+    }
+    .btn-close {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-primary);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    .btn-close:hover {
+      background: rgba(239, 68, 68, 0.3);
+      border-color: #ef4444;
+      color: #fca5a5;
+    }
+    .modal-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(0, 0, 0, 0.25);
+      overflow-x: auto;
+    }
+    .modal-tab-btn {
+      flex: 1;
+      padding: 0.75rem 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      font-family: inherit;
+    }
+    .modal-tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .modal-tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background: rgba(16, 185, 129, 0.12);
+    }
+    .modal-body {
+      padding: 1.5rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: monospace;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 0.6rem 0.85rem;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .form-textarea {
+      font-family: monospace;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      resize: vertical;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    @media (max-width: 600px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+    .btn-action-primary {
+      background: var(--accent);
+      color: #064e3b;
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+    .btn-action-primary:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+    .btn-action-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: var(--text-primary);
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+    .btn-action-secondary:hover {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--accent);
+    }
+    .info-card {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 0.9rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .badge-pill {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-family: monospace;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    /* Player Section */
+    .player-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      margin-bottom: 2rem;
+    }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--accent);
+    }
+    .now-playing-card {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .np-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .surah-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--accent-dark);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+    .np-names .arabic {
+      font-family: serif;
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    .np-names .english {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .scrubber-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .slider {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.1);
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--accent);
+    }
+    .controls-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .btn-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    .btn-circle:hover {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--accent);
+      transform: scale(1.05);
+    }
+    .btn-play-lg {
+      width: 56px;
+      height: 56px;
+      background: var(--accent);
+      color: #064e3b;
+      font-size: 1.4rem;
+      border: none;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .btn-play-lg:hover {
+      background: #34d399;
+      transform: scale(1.08);
+    }
+    .speed-pills {
+      display: flex;
+      justify-content: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .speed-btn {
+      padding: 0.25rem 0.6rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      border: 1px solid var(--card-border);
+      background: rgba(0,0,0,0.2);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: monospace;
+      transition: all 0.2s;
+    }
+    .speed-btn.active, .speed-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(16, 185, 129, 0.15);
+    }
+    .search-box {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--card-border);
+      color: var(--text-primary);
+      outline: none;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      transition: all 0.2s;
+    }
+    .search-box:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+    .surah-list {
+      max-height: 380px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      padding-right: 0.25rem;
+    }
+    .surah-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0.85rem;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .surah-item:hover, .surah-item.active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--accent);
+      transform: translateX(3px);
+    }
+    .surah-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .surah-id {
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+      width: 24px;
+    }
+    .surah-name-en {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .surah-name-ar {
+      font-family: serif;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+    .meta-card {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-family: monospace;
+    }
+    .meta-row:last-child {
+      border-bottom: none;
+    }
+    .meta-val {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+    .toast-popup {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #064e3b;
+      border: 1px solid #10b981;
+      color: #ecfdf5;
+      padding: 0.65rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      z-index: 2000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="atmosphere">
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="brand-group">
+        <div class="logo-badge">SZ</div>
+        <div>
+          <div class="brand-title">SAHBI S.A.</div>
+          <div class="brand-sub">GEMIN CORE V7 PRO FINAL · BIN LAUNCHER</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-toggle btn-studio" onclick="openStudioModal('editor')" id="headerStudioBtn" title="Ouvrir le Studio Editor">
+          🛠️ Studio Editor
+        </button>
+        <button class="btn-toggle btn-export" onclick="openStudioModal('export')" id="headerExportBtn" title="Exporter BIN_HTML.LANCER">
+          📥 Export
+        </button>
+        <button class="btn-toggle btn-drive" onclick="openStudioModal('drive')" id="headerDriveBtn" title="Drive Store">
+          💾 Drive Store
+        </button>
+        <button class="btn-toggle" onclick="toggleTheme()" id="themeBtn">Theme: Emerald</button>
+        <button class="btn-toggle" onclick="toggleLang()" id="langBtn">Lang: FR</button>
+      </div>
+    </header>
+
+    <div class="banner">
+      <span class="banner-tag">Lancer_bin.html — Studio Editor & Launcher Hub</span>
+      <h1 id="bannerTitle">Plateforme Quran & Récitations Islamiques</h1>
+      <p id="bannerDesc">Récitation intégrale du Saint Coran par Cheikh Saoud Al-Chouraïm (114 Sourates). Conçu par SAHBI S.A. avec licence NETSECUREPRO.CA, moteur GEMIN CORE V7 PRO FINAL et Studio Editor intégré.</p>
+      
+      <div class="launch-grid">
+        <a href="/" class="btn-launch">
+          <span>🚀 Lancer l'Application Principale</span>
+        </a>
+        <a href="/?mode=mobile" class="btn-secondary">
+          <span>📱 Mode Format Mobile</span>
+        </a>
+        <button class="btn-studio-action" onclick="openStudioModal('editor')">
+          <span>🛠️ Studio Editor (Éditeur)</span>
+        </button>
+        <button class="btn-export-action" onclick="openStudioModal('export')">
+          <span>📥 Exporter BIN_HTML.LANCER</span>
+        </button>
+        <button class="btn-drive-action" onclick="openStudioModal('drive')">
+          <span>💾 Drive Store & Cloud</span>
+        </button>
+        <button class="btn-secondary" onclick="scrollToPlayer()">
+          <span>📻 Lecteur Binaire Intégré</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Integrated Standalone Player -->
+    <div class="player-section" id="playerSection">
+      <div class="section-title">
+        <span>📻 Lecteur Autonome (Offline Audio Engine)</span>
+        <span style="font-size:0.75rem; color:var(--text-muted); font-family:monospace;">Sheikh Saud Al-Shuraim</span>
+      </div>
+
+      <div class="now-playing-card">
+        <div class="np-left">
+          <div class="surah-circle" id="npId">1</div>
+          <div class="np-names">
+            <div class="arabic" id="npArabic">الفاتحة</div>
+            <div class="english" id="npEnglish">Al-Fatihah</div>
+          </div>
+        </div>
+        <div style="text-align: right; font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">
+          <span id="cdnLabel">Serveur CDN 7</span><br/>
+          <span style="color:var(--accent);">128 kbps MP3</span>
+        </div>
+      </div>
+
+      <!-- Scrubber -->
+      <div class="scrubber-wrap">
+        <span id="currentTime">0:00</span>
+        <input type="range" class="slider" id="progressSlider" min="0" max="100" value="0" onchange="seekAudio(this.value)">
+        <span id="totalDuration">0:00</span>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-row">
+        <button class="btn-circle" onclick="skipToStart()" title="Recommencer">↺</button>
+        <button class="btn-circle" onclick="playPrev()" title="Précédent">⏮</button>
+        <button class="btn-circle btn-play-lg" onclick="togglePlay()" id="playBtn" title="Lecture / Pause">▶</button>
+        <button class="btn-circle" onclick="playNext()" title="Suivant">⏭</button>
+        <button class="btn-circle" onclick="toggleMute()" id="muteBtn" title="Muet">🔊</button>
+      </div>
+
+      <!-- Speed Selector -->
+      <div style="margin-bottom: 1rem; text-align: center;">
+        <div style="font-size:0.7rem; color:var(--text-muted); font-family:monospace; margin-bottom:0.4rem;">VITESSE DE LECTURE : <span id="speedVal" style="color:var(--accent); font-weight:bold;">1.0x</span></div>
+        <div class="speed-pills">
+          <button class="speed-btn" onclick="setSpeed(0.5, this)">0.5x</button>
+          <button class="speed-btn" onclick="setSpeed(0.75, this)">0.75x</button>
+          <button class="speed-btn active" onclick="setSpeed(1.0, this)">1.0x</button>
+          <button class="speed-btn" onclick="setSpeed(1.25, this)">1.25x</button>
+          <button class="speed-btn" onclick="setSpeed(1.5, this)">1.5x</button>
+          <button class="speed-btn" onclick="setSpeed(2.0, this)">2.0x</button>
+        </div>
+      </div>
+
+      <!-- Search & List -->
+      <input type="text" class="search-box" id="searchInput" placeholder="Rechercher une sourate (ex: Baqarah, Yasin, الفاتحة)..." oninput="filterSurahs()">
+
+      <div class="surah-list" id="surahList">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- Certification & Signature Metadata -->
+    <div class="meta-card">
+      <div style="font-weight:700; color:var(--accent); margin-bottom:0.5rem; font-size:0.85rem; display:flex; justify-content:space-between; align-items:center;">
+        <span>🔐 CERTIFICAT D'INTÉGRITÉ LOGICIELLE & SIGNATURE IA</span>
+        <button class="btn-toggle btn-studio" onclick="openStudioModal('ai23')">Inspecter AI23</button>
+      </div>
+      <div class="meta-row">
+        <span>ORGANISATION :</span>
+        <span class="meta-val">SAHBI S.A.</span>
+      </div>
+      <div class="meta-row">
+        <span>LICENCE :</span>
+        <span class="meta-val">LICENSE NETSECUREPRO.CA</span>
+      </div>
+      <div class="meta-row">
+        <span>MOTEUR :</span>
+        <span class="meta-val">GEMIN CORE V7 PRO FINAL</span>
+      </div>
+      <div class="meta-row">
+        <span>SIGNATURE IA :</span>
+        <span class="meta-val">IA_LOGIC_SIGNATURE: ZOUBIROU-IA-2025</span>
+      </div>
+      <div class="meta-row">
+        <span>RÉCITATEUR :</span>
+        <span class="meta-val">Sheikh Saud Al-Shuraim (114 Sourates)</span>
+      </div>
+      <div class="meta-row">
+        <span>DÉPÔT GIT :</span>
+        <span class="meta-val">https://github.com/milyes/MPLAYER-islam.git</span>
+      </div>
+    </div>
+
+    <footer>
+      SAHBI S.A. · NETSECUREPRO.CA · GEMIN CORE V7 PRO FINAL · IA_LOGIC_SIGNATURE: ZOUBIROU-IA-2025
+    </footer>
+  </div>
+
+  <!-- STUDIO EDITOR & DRIVE STORE MODAL -->
+  <div class="modal-overlay" id="studioModal" style="display:none;" onclick="handleModalOverlayClick(event)">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">
+            <span>🛠️ Studio Editor & Drive Store</span>
+            <span class="badge-pill">SAHBI S.A.</span>
+          </div>
+          <div class="modal-subtitle">
+            GEMIN CORE V7 PRO FINAL · NETSECUREPRO.CA · ZOUBIROU-IA-2025
+          </div>
+        </div>
+        <button class="btn-close" onclick="closeStudioModal()" title="Fermer">✕</button>
+      </div>
+
+      <div class="modal-tabs">
+        <button class="modal-tab-btn active" id="tabBtnEditor" onclick="switchStudioTab('editor')">
+          🛠️ Studio Editor
+        </button>
+        <button class="modal-tab-btn" id="tabBtnExport" onclick="switchStudioTab('export')">
+          📥 Export BIN_HTML
+        </button>
+        <button class="modal-tab-btn" id="tabBtnDrive" onclick="switchStudioTab('drive')">
+          💾 Drive Store
+        </button>
+        <button class="modal-tab-btn" id="tabBtnAi23" onclick="switchStudioTab('ai23')">
+          🤖 AI23 Certification
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- TAB 1: STUDIO EDITOR -->
+        <div id="tabContentEditor">
+          <div class="info-card">
+            <strong>Éditeur Studio Intégré :</strong> Personnalisez le serveur CDN audio, les métadonnées de récitation et le comportement du lecteur. Vos modifications sont appliquées directement dans le Studio et peuvent être exportées dans le Drive Store ou en fichier binaire autonome.
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Nom du Récitateur</label>
+              <input type="text" class="form-input" id="cfgReciter" value="Sheikh Saud Al-Shuraim" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Entité / Organisation</label>
+              <input type="text" class="form-input" id="cfgEntity" value="SAHBI S.A." />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Serveur CDN MP3 Base URL</label>
+              <input type="text" class="form-input" id="cfgCdn" value="https://server7.mp3quran.net/shur/" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Qualité Audio Bitrate</label>
+              <select class="form-select" id="cfgBitrate">
+                <option value="128">128 kbps (Haute fidélité standard)</option>
+                <option value="192">192 kbps (Studio Master)</option>
+                <option value="64">64 kbps (Économie de données mobile)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Configuration JSON Live Studio (Modifiable)</label>
+            <textarea class="form-textarea" rows="7" id="cfgJsonArea"></textarea>
+          </div>
+
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
+            <button class="btn-action-secondary" onclick="resetStudioConfig()">
+              🔄 Réinitialiser
+            </button>
+            <button class="btn-action-primary" onclick="applyStudioConfig()">
+              💾 Appliquer au Studio
+            </button>
+            <button class="btn-action-primary" style="background:var(--gold); color:#1a1005;" onclick="downloadStudioConfigJson()">
+              📥 Exporter Config JSON
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB 2: EXPORT BIN_HTML -->
+        <div id="tabContentExport" style="display:none;">
+          <div class="info-card">
+            <strong>Export Fichier Binaire Autonome (BIN_HTML.LANCER) :</strong>
+            Exportez l'intégralité du lecteur Coranique sous forme d'un fichier HTML unique <code>Lancer_bin.html</code>. Ce fichier contient tout le code CSS, JavaScript, l'index complet des 114 sourates, le Studio Editor et les passerelles CDN. Il fonctionne immédiatement hors-ligne ou sur n'importe quel navigateur sans serveur node.js !
+          </div>
+
+          <div style="background:rgba(0,0,0,0.3); border:1px solid var(--card-border); border-radius:14px; padding:1.25rem; margin-bottom:1.5rem;">
+            <div style="font-weight:700; color:var(--accent); font-size:0.95rem; margin-bottom:0.4rem;">
+              📦 Fichier Prêt à l'Emploi : Lancer_bin.html
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">
+              Taille estimée : ~45 Ko · 114 Sourates indexées · Signé par SAHBI S.A. · Compatible Chrome, Firefox, Safari, Edge, Android & iOS.
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:0.6rem;">
+              <button class="btn-action-primary" style="justify-content:center; padding:0.85rem;" onclick="exportBinHtml('Lancer_bin.html')">
+                📥 Télécharger Lancer_bin.html (Fichier Autonome Binaire)
+              </button>
+              <button class="btn-action-secondary" style="justify-content:center; padding:0.85rem;" onclick="exportBinHtml('LANCER_BIN_HTML_AI23.html')">
+                📥 Télécharger avec Signature Complète (LANCER_BIN_HTML_AI23.html)
+              </button>
+              <button class="btn-action-secondary" style="justify-content:center;" onclick="copyFullHtmlCode()">
+                📋 Copier Tout le Code Source HTML dans le Presse-Papiers
+              </button>
+            </div>
+          </div>
+
+          <div class="meta-card">
+            <div class="meta-row">
+              <span>STATUT DU FICHIER :</span>
+              <span class="meta-val">AUTONOME & EXPORTABLE</span>
+            </div>
+            <div class="meta-row">
+              <span>DESTINATION DISQUE :</span>
+              <span class="meta-val">/app/applet/public/Lancer_bin.html</span>
+            </div>
+            <div class="meta-row">
+              <span>COMPATIBILITÉ STUDIO :</span>
+              <span class="meta-val">AI STUDIO BUILD V7 / VITE / WEBVIEW</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: DRIVE STORE -->
+        <div id="tabContentDrive" style="display:none;">
+          <div class="info-card">
+            <strong>Drive Store — Persistance & Sauvegardes Cloud/Local :</strong>
+            Le Drive Store conserve vos marque-pages, vos playlists personnalisées, vos enregistrements d'entraînement vocal et vos configurations de lecture. Vous pouvez sauvegarder un instantané dans le Drive Store local ou exporter un fichier JSON pour synchroniser entre appareils.
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:0.75rem; margin-bottom:1.25rem;">
+            <div style="background:rgba(0,0,0,0.3); border:1px solid var(--card-border); border-radius:12px; padding:0.75rem; text-align:center;">
+              <div style="font-size:0.7rem; color:var(--text-muted); font-family:monospace;">SOURATES DISPO</div>
+              <div style="font-size:1.3rem; font-weight:800; color:var(--accent);">114</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.3); border:1px solid var(--card-border); border-radius:12px; padding:0.75rem; text-align:center;">
+              <div style="font-size:0.7rem; color:var(--text-muted); font-family:monospace;">STATUS DRIVE</div>
+              <div style="font-size:1.1rem; font-weight:800; color:var(--accent);" id="driveStatusText">CONNECTÉ</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.3); border:1px solid var(--card-border); border-radius:12px; padding:0.75rem; text-align:center;">
+              <div style="font-size:0.7rem; color:var(--text-muted); font-family:monospace;">DERNIER SYNC</div>
+              <div style="font-size:0.85rem; font-weight:700; color:var(--text-primary); margin-top:0.25rem;" id="driveLastSyncText">Maintenant</div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:0.75rem; margin-bottom:1.25rem;">
+            <button class="btn-action-primary" style="justify-content:center;" onclick="saveToDriveStore()">
+              💾 Sauvegarder l'État Actuel dans le Drive Store
+            </button>
+            <button class="btn-action-secondary" style="justify-content:center;" onclick="exportDriveStoreJson()">
+              📤 Exporter le Drive Store vers Fichier JSON (mplayer_drive_store.json)
+            </button>
+            
+            <label class="btn-action-secondary" style="justify-content:center; cursor:pointer;">
+              📥 Importer un Fichier Drive Store JSON
+              <input type="file" id="driveImportInput" accept=".json" style="display:none;" onchange="importDriveStoreJson(event)" />
+            </label>
+          </div>
+
+          <div class="meta-card">
+            <div class="meta-row">
+              <span>STOCKAGE LOCAL :</span>
+              <span class="meta-val">IndexedDB & localStorage</span>
+            </div>
+            <div class="meta-row">
+              <span>CLEF DE STOCKAGE :</span>
+              <span class="meta-val">SAHBI_DRIVE_STORE_V7</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: AI23 CERTIFICATION -->
+        <div id="tabContentAi23" style="display:none;">
+          <div class="info-card">
+            <strong>Certificat d'Intégrité AI23 & Architecture Pro :</strong>
+            Projet certifié sous l'égide de <strong>SAHBI S.A.</strong> et propulsé par le moteur <strong>GEMIN CORE V7 PRO FINAL</strong>.
+          </div>
+
+          <div class="meta-card" style="margin-bottom:1.25rem;">
+            <div class="meta-row">
+              <span>ENTITÉ TITULAIRE :</span>
+              <span class="meta-val">SAHBI S.A.</span>
+            </div>
+            <div class="meta-row">
+              <span>DIRECTEUR TECHNIQUE :</span>
+              <span class="meta-val">MOHAMMED ILYES ZOUBIROU</span>
+            </div>
+            <div class="meta-row">
+              <span>LICENCE ACTIVE :</span>
+              <span class="meta-val">LICENSE NETSECUREPRO.CA</span>
+            </div>
+            <div class="meta-row">
+              <span>MOTEUR NOYAU :</span>
+              <span class="meta-val">GEMIN CORE V7 PRO FINAL</span>
+            </div>
+            <div class="meta-row">
+              <span>SIGNATURE IA OFFICIELLE :</span>
+              <span class="meta-val">IA_LOGIC_SIGNATURE: ZOUBIROU-IA-2025</span>
+            </div>
+            <div class="meta-row">
+              <span>PROTOCOLE :</span>
+              <span class="meta-val">AI23-STANDALONE-V7-PRO</span>
+            </div>
+            <div class="meta-row">
+              <span>DÉPÔT GITHUB ORIGINE :</span>
+              <span class="meta-val">https://github.com/milyes/MPLAYER-islam.git</span>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end;">
+            <button class="btn-action-primary" onclick="copyAi23Certificate()">
+              📋 Copier le Certificat d'Intégrité
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast-popup" id="toastBox">Action effectuée avec succès !</div>
+
+  <audio id="audioElement"></audio>
+
+  <script>
+    const surahs = [
+      {"id":1,"name_arabic":"الفاتحة","name_english":"Al-Fatihah"},
+      {"id":2,"name_arabic":"البقرة","name_english":"Al-Baqarah"},
+      {"id":3,"name_arabic":"آل عمران","name_english":"Ali 'Imran"},
+      {"id":4,"name_arabic":"النساء","name_english":"An-Nisa"},
+      {"id":5,"name_arabic":"المائدة","name_english":"Al-Ma'idah"},
+      {"id":6,"name_arabic":"الأنعام","name_english":"Al-An'am"},
+      {"id":7,"name_arabic":"الأعراف","name_english":"Al-A'raf"},
+      {"id":8,"name_arabic":"الأنفال","name_english":"Al-Anfal"},
+      {"id":9,"name_arabic":"التوبة","name_english":"At-Tawbah"},
+      {"id":10,"name_arabic":"يونس","name_english":"Yunus"},
+      {"id":11,"name_arabic":"هود","name_english":"Hud"},
+      {"id":12,"name_arabic":"يوسف","name_english":"Yusuf"},
+      {"id":13,"name_arabic":"الرعد","name_english":"Ar-Ra'd"},
+      {"id":14,"name_arabic":"ابراهيم","name_english":"Ibrahim"},
+      {"id":15,"name_arabic":"الحجر","name_english":"Al-Hijr"},
+      {"id":16,"name_arabic":"النحل","name_english":"An-Nahl"},
+      {"id":17,"name_arabic":"الإسراء","name_english":"Al-Isra"},
+      {"id":18,"name_arabic":"الكهف","name_english":"Al-Kahf"},
+      {"id":19,"name_arabic":"مريم","name_english":"Maryam"},
+      {"id":20,"name_arabic":"طه","name_english":"Ta-Ha"},
+      {"id":21,"name_arabic":"الأنبياء","name_english":"Al-Anbiya"},
+      {"id":22,"name_arabic":"الحج","name_english":"Al-Hajj"},
+      {"id":23,"name_arabic":"المؤمنون","name_english":"Al-Mu'minun"},
+      {"id":24,"name_arabic":"النور","name_english":"An-Nur"},
+      {"id":25,"name_arabic":"الفرقان","name_english":"Al-Furqan"},
+      {"id":26,"name_arabic":"الشعراء","name_english":"Ash-Shu'ara"},
+      {"id":27,"name_arabic":"النمل","name_english":"An-Naml"},
+      {"id":28,"name_arabic":"القصص","name_english":"Al-Qasas"},
+      {"id":29,"name_arabic":"العنكبوت","name_english":"Al-'Ankabut"},
+      {"id":30,"name_arabic":"الروم","name_english":"Ar-Rum"},
+      {"id":31,"name_arabic":"لقمان","name_english":"Luqman"},
+      {"id":32,"name_arabic":"السجدة","name_english":"As-Sajdah"},
+      {"id":33,"name_arabic":"الأحزاب","name_english":"Al-Ahzab"},
+      {"id":34,"name_arabic":"سبإ","name_english":"Saba"},
+      {"id":35,"name_arabic":"فاطر","name_english":"Fatir"},
+      {"id":36,"name_arabic":"يس","name_english":"Ya-Sin"},
+      {"id":37,"name_arabic":"الصافات","name_english":"As-Saffat"},
+      {"id":38,"name_arabic":"ص","name_english":"Sad"},
+      {"id":39,"name_arabic":"الزمر","name_english":"Az-Zumar"},
+      {"id":40,"name_arabic":"غافر","name_english":"Ghafir"},
+      {"id":41,"name_arabic":"فصلت","name_english":"Fussilat"},
+      {"id":42,"name_arabic":"الشورى","name_english":"Ash-Shura"},
+      {"id":43,"name_arabic":"الزخرف","name_english":"Az-Zukhruf"},
+      {"id":44,"name_arabic":"الدخان","name_english":"Ad-Dukhan"},
+      {"id":45,"name_arabic":"الجاثية","name_english":"Al-Jathiyah"},
+      {"id":46,"name_arabic":"الأحقاف","name_english":"Al-Ahqaf"},
+      {"id":47,"name_arabic":"محمد","name_english":"Muhammad"},
+      {"id":48,"name_arabic":"الفتح","name_english":"Al-Fath"},
+      {"id":49,"name_arabic":"الحجرات","name_english":"Al-Hujurat"},
+      {"id":50,"name_arabic":"ق","name_english":"Qaf"},
+      {"id":51,"name_arabic":"الذاريات","name_english":"Adh-Dhariyat"},
+      {"id":52,"name_arabic":"الطور","name_english":"At-Tur"},
+      {"id":53,"name_arabic":"النجم","name_english":"An-Najm"},
+      {"id":54,"name_arabic":"القمر","name_english":"Al-Qamar"},
+      {"id":55,"name_arabic":"الرحمن","name_english":"Ar-Rahman"},
+      {"id":56,"name_arabic":"الواقعة","name_english":"Al-Waqi'ah"},
+      {"id":57,"name_arabic":"الحديد","name_english":"Al-Hadid"},
+      {"id":58,"name_arabic":"المجادلة","name_english":"Al-Mujadila"},
+      {"id":59,"name_arabic":"الحشر","name_english":"Al-Hashr"},
+      {"id":60,"name_arabic":"الممتحنة","name_english":"Al-Mumtahanah"},
+      {"id":61,"name_arabic":"الصف","name_english":"As-Saff"},
+      {"id":62,"name_arabic":"الجمعة","name_english":"Al-Jumu'ah"},
+      {"id":63,"name_arabic":"المنافقون","name_english":"Al-Munafiqun"},
+      {"id":64,"name_arabic":"التغابن","name_english":"At-Taghabun"},
+      {"id":65,"name_arabic":"الطلاق","name_english":"At-Talaq"},
+      {"id":66,"name_arabic":"التحريم","name_english":"At-Tahrim"},
+      {"id":67,"name_arabic":"الملك","name_english":"Al-Mulk"},
+      {"id":68,"name_arabic":"القلم","name_english":"Al-Qalam"},
+      {"id":69,"name_arabic":"الحاقة","name_english":"Al-Haqqah"},
+      {"id":70,"name_arabic":"المعارج","name_english":"Al-Ma'arij"},
+      {"id":71,"name_arabic":"نوح","name_english":"Nuh"},
+      {"id":72,"name_arabic":"الجن","name_english":"Al-Jinn"},
+      {"id":73,"name_arabic":"المزمل","name_english":"Al-Muzzammil"},
+      {"id":74,"name_arabic":"المدثر","name_english":"Al-Muddaththir"},
+      {"id":75,"name_arabic":"القيامة","name_english":"Al-Qiyamah"},
+      {"id":76,"name_arabic":"الانسان","name_english":"Al-Insan"},
+      {"id":77,"name_arabic":"المرسلات","name_english":"Al-Mursalat"},
+      {"id":78,"name_arabic":"النبإ","name_english":"An-Naba"},
+      {"id":79,"name_arabic":"النازعات","name_english":"An-Nazi'at"},
+      {"id":80,"name_arabic":"عبس","name_english":"'Abasa"},
+      {"id":81,"name_arabic":"التكوير","name_english":"At-Takwir"},
+      {"id":82,"name_arabic":"الإنفطار","name_english":"Al-Infitar"},
+      {"id":83,"name_arabic":"المطففين","name_english":"Al-Mutaffifin"},
+      {"id":84,"name_arabic":"الإنشقاق","name_english":"Al-Inshiqaq"},
+      {"id":85,"name_arabic":"البروج","name_english":"Al-Buruj"},
+      {"id":86,"name_arabic":"الطارق","name_english":"At-Tariq"},
+      {"id":87,"name_arabic":"الأعلى","name_english":"Al-A'la"},
+      {"id":88,"name_arabic":"الغاشية","name_english":"Al-Ghashiyah"},
+      {"id":89,"name_arabic":"الفجر","name_english":"Al-Fajr"},
+      {"id":90,"name_arabic":"البلد","name_english":"Al-Balad"},
+      {"id":91,"name_arabic":"الشمس","name_english":"Ash-Shams"},
+      {"id":92,"name_arabic":"الليل","name_english":"Al-Layl"},
+      {"id":93,"name_arabic":"الضحى","name_english":"Ad-Duha"},
+      {"id":94,"name_arabic":"الشرح","name_english":"Ash-Sharh"},
+      {"id":95,"name_arabic":"التين","name_english":"At-Tin"},
+      {"id":96,"name_arabic":"العلق","name_english":"Al-'Alaq"},
+      {"id":97,"name_arabic":"القدر","name_english":"Al-Qadr"},
+      {"id":98,"name_arabic":"البينة","name_english":"Al-Bayyinah"},
+      {"id":99,"name_arabic":"الزلزلة","name_english":"Az-Zalzalah"},
+      {"id":100,"name_arabic":"العاديات","name_english":"Al-'Adiyat"},
+      {"id":101,"name_arabic":"القارعة","name_english":"Al-Qari'ah"},
+      {"id":102,"name_arabic":"التكاثر","name_english":"At-Takathur"},
+      {"id":103,"name_arabic":"العصر","name_english":"Al-'Asr"},
+      {"id":104,"name_arabic":"الهمزة","name_english":"Al-Humazah"},
+      {"id":105,"name_arabic":"الفيل","name_english":"Al-Fil"},
+      {"id":106,"name_arabic":"قريش","name_english":"Quraysh"},
+      {"id":107,"name_arabic":"الماعون","name_english":"Al-Ma'un"},
+      {"id":108,"name_arabic":"الكوثر","name_english":"Al-Kawthar"},
+      {"id":109,"name_arabic":"الكافرون","name_english":"Al-Kafirun"},
+      {"id":110,"name_arabic":"النصر","name_english":"An-Nasr"},
+      {"id":111,"name_arabic":"المسد","name_english":"Al-Masad"},
+      {"id":112,"name_arabic":"الإخلاص","name_english":"Al-Ikhlas"},
+      {"id":113,"name_arabic":"الفلق","name_english":"Al-Falaq"},
+      {"id":114,"name_arabic":"الناس","name_english":"An-Nas"}
+    ];
+
+    let studioConfig = {
+      app: "MPLAYER-ISLAM",
+      entity: "SAHBI S.A.",
+      version: "GEMIN CORE V7 PRO FINAL",
+      signature: "ZOUBIROU-IA-2025",
+      reciter: "Sheikh Saud Al-Shuraim",
+      cdn: "https://server7.mp3quran.net/shur/",
+      bitrate: "128",
+      totalSurahs: 114
+    };
+
+    let currentIndex = 0;
+    let isPlaying = false;
+    const audio = document.getElementById('audioElement');
+    const playBtn = document.getElementById('playBtn');
+    const slider = document.getElementById('progressSlider');
+    const curTime = document.getElementById('currentTime');
+    const totTime = document.getElementById('totalDuration');
+
+    function renderSurahs(list) {
+      const container = document.getElementById('surahList');
+      container.innerHTML = '';
+      list.forEach((s) => {
+        const div = document.createElement('div');
+        div.className = 'surah-item' + (s.id === surahs[currentIndex].id ? ' active' : '');
+        div.onclick = () => selectSurah(s.id - 1);
+        div.innerHTML = `
+          <div class="surah-left">
+            <span class="surah-id">${s.id}</span>
+            <span class="surah-name-en">${s.name_english}</span>
+          </div>
+          <div class="surah-name-ar">${s.name_arabic}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function selectSurah(index) {
+      currentIndex = index;
+      const s = surahs[currentIndex];
+      document.getElementById('npId').innerText = s.id;
+      document.getElementById('npArabic').innerText = s.name_arabic;
+      document.getElementById('npEnglish').innerText = s.name_english;
+      const paddedId = s.id.toString().padStart(3, '0');
+      audio.src = `${studioConfig.cdn}${paddedId}.mp3`;
+      audio.play().then(() => {
+        isPlaying = true;
+        playBtn.innerText = '⏸';
+      }).catch(e => console.log('Audio load:', e));
+      filterSurahs();
+    }
+
+    function togglePlay() {
+      if (!audio.src) {
+        selectSurah(currentIndex);
+        return;
+      }
+      if (isPlaying) {
+        audio.pause();
+        isPlaying = false;
+        playBtn.innerText = '▶';
+      } else {
+        audio.play().then(() => {
+          isPlaying = true;
+          playBtn.innerText = '⏸';
+        }).catch(e => console.log(e));
+      }
+    }
+
+    function playNext() {
+      if (currentIndex < surahs.length - 1) {
+        selectSurah(currentIndex + 1);
+      }
+    }
+
+    function playPrev() {
+      if (currentIndex > 0) {
+        selectSurah(currentIndex - 1);
+      }
+    }
+
+    function skipToStart() {
+      audio.currentTime = 0;
+    }
+
+    function toggleMute() {
+      audio.muted = !audio.muted;
+      document.getElementById('muteBtn').innerText = audio.muted ? '🔇' : '🔊';
+    }
+
+    function setSpeed(spd, el) {
+      audio.playbackRate = spd;
+      document.getElementById('speedVal').innerText = spd + 'x';
+      document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function seekAudio(val) {
+      if (audio.duration) {
+        audio.currentTime = (val / 100) * audio.duration;
+      }
+    }
+
+    function formatTime(s) {
+      if (isNaN(s)) return '0:00';
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60);
+      return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
+    audio.ontimeupdate = () => {
+      if (audio.duration) {
+        slider.value = (audio.currentTime / audio.duration) * 100;
+        curTime.innerText = formatTime(audio.currentTime);
+        totTime.innerText = formatTime(audio.duration);
+      }
+    };
+
+    audio.onended = () => {
+      playNext();
+    };
+
+    function filterSurahs() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filtered = surahs.filter(s => 
+        s.name_english.toLowerCase().includes(q) || 
+        s.name_arabic.includes(q) || 
+        s.id.toString() === q
+      );
+      renderSurahs(filtered);
+    }
+
+    function scrollToPlayer() {
+      document.getElementById('playerSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'emerald';
+      const next = current === 'emerald' ? 'mythos' : 'emerald';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeBtn').innerText = 'Theme: ' + (next === 'emerald' ? 'Emerald' : 'Mythos');
+    }
+
+    let curLang = 'fr';
+    function toggleLang() {
+      const langs = ['fr', 'en', 'ar'];
+      const nextIdx = (langs.indexOf(curLang) + 1) % langs.length;
+      curLang = langs[nextIdx];
+      document.getElementById('langBtn').innerText = 'Lang: ' + curLang.toUpperCase();
+      if (curLang === 'ar') {
+        document.getElementById('bannerTitle').innerText = 'منصة القرآن الكريم والتلاوات الإسلامية';
+        document.getElementById('bannerDesc').innerText = 'تلاوة القرآن الكريم كاملاً بصوت الشيخ سعود الشريم (114 سورة). تم التطوير بواسطة SAHBI S.A. بترخيص NETSECUREPRO.CA ومحرك GEMIN CORE V7 PRO FINAL.';
+      } else if (curLang === 'en') {
+        document.getElementById('bannerTitle').innerText = 'Quran Platform & Islamic Recitations';
+        document.getElementById('bannerDesc').innerText = 'Complete recitation of the Holy Quran by Sheikh Saud Al-Shuraim (114 Surahs). Engineered by SAHBI S.A. under NETSECUREPRO.CA license and GEMIN CORE V7 PRO FINAL engine.';
+      } else {
+        document.getElementById('bannerTitle').innerText = 'Plateforme Quran & Récitations Islamiques';
+        document.getElementById('bannerDesc').innerText = 'Récitation intégrale du Saint Coran par Cheikh Saoud Al-Chouraïm (114 Sourates). Conçu par SAHBI S.A. avec licence NETSECUREPRO.CA et moteur GEMIN CORE V7 PRO FINAL.';
+      }
+    }
+
+    // =========================================================================
+    // STUDIO EDITOR & DRIVE STORE LOGIC
+    // =========================================================================
+    function openStudioModal(tab = 'editor') {
+      document.getElementById('studioModal').style.display = 'flex';
+      switchStudioTab(tab);
+      syncConfigToJsonArea();
+    }
+
+    function closeStudioModal() {
+      document.getElementById('studioModal').style.display = 'none';
+    }
+
+    function handleModalOverlayClick(e) {
+      if (e.target.id === 'studioModal') {
+        closeStudioModal();
+      }
+    }
+
+    function switchStudioTab(tab) {
+      const tabs = ['editor', 'export', 'drive', 'ai23'];
+      tabs.forEach(t => {
+        const content = document.getElementById('tabContent' + t.charAt(0).toUpperCase() + t.slice(1));
+        const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (content) content.style.display = (t === tab) ? 'block' : 'none';
+        if (btn) {
+          if (t === tab) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      });
+    }
+
+    function syncConfigToJsonArea() {
+      studioConfig.reciter = document.getElementById('cfgReciter').value;
+      studioConfig.entity = document.getElementById('cfgEntity').value;
+      studioConfig.cdn = document.getElementById('cfgCdn').value;
+      studioConfig.bitrate = document.getElementById('cfgBitrate').value;
+      document.getElementById('cfgJsonArea').value = JSON.stringify(studioConfig, null, 2);
+    }
+
+    function applyStudioConfig() {
+      try {
+        const parsed = JSON.parse(document.getElementById('cfgJsonArea').value);
+        studioConfig = { ...studioConfig, ...parsed };
+        document.getElementById('cfgReciter').value = studioConfig.reciter || '';
+        document.getElementById('cfgEntity').value = studioConfig.entity || 'SAHBI S.A.';
+        document.getElementById('cfgCdn').value = studioConfig.cdn || '';
+        document.getElementById('cfgBitrate').value = studioConfig.bitrate || '128';
+        document.getElementById('cdnLabel').innerText = (studioConfig.reciter || 'CDN') + ' (' + studioConfig.bitrate + 'k)';
+        showToast('Configuration Studio appliquée avec succès !');
+      } catch (err) {
+        showToast('Erreur dans la syntaxe JSON : ' + err.message);
+      }
+    }
+
+    function resetStudioConfig() {
+      studioConfig = {
+        app: "MPLAYER-ISLAM",
+        entity: "SAHBI S.A.",
+        version: "GEMIN CORE V7 PRO FINAL",
+        signature: "ZOUBIROU-IA-2025",
+        reciter: "Sheikh Saud Al-Shuraim",
+        cdn: "https://server7.mp3quran.net/shur/",
+        bitrate: "128",
+        totalSurahs: 114
+      };
+      document.getElementById('cfgReciter').value = studioConfig.reciter;
+      document.getElementById('cfgEntity').value = studioConfig.entity;
+      document.getElementById('cfgCdn').value = studioConfig.cdn;
+      document.getElementById('cfgBitrate').value = studioConfig.bitrate;
+      syncConfigToJsonArea();
+      showToast('Configuration Studio réinitialisée par défaut.');
+    }
+
+    function downloadStudioConfigJson() {
+      syncConfigToJsonArea();
+      const blob = new Blob([document.getElementById('cfgJsonArea').value], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sahbi_studio_config.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Fichier sahbi_studio_config.json exporté !');
+    }
+
+    function exportBinHtml(fileName = 'Lancer_bin.html') {
+      const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Export de ${fileName} réussi !`);
+    }
+
+    function copyFullHtmlCode() {
+      const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      navigator.clipboard.writeText(fullHtml).then(() => {
+        showToast('Code source HTML complet copié dans le presse-papiers !');
+      }).catch(err => {
+        showToast('Erreur de copie : ' + err.message);
+      });
+    }
+
+    function saveToDriveStore() {
+      const driveData = {
+        timestamp: new Date().toISOString(),
+        version: "GEMIN CORE V7 PRO FINAL",
+        signature: "ZOUBIROU-IA-2025",
+        entity: "SAHBI S.A.",
+        studioConfig: studioConfig,
+        currentSurah: surahs[currentIndex],
+        language: curLang,
+        theme: document.documentElement.getAttribute('data-theme') || 'emerald'
+      };
+      localStorage.setItem('SAHBI_DRIVE_STORE_V7', JSON.stringify(driveData));
+      document.getElementById('driveLastSyncText').innerText = new Date().toLocaleTimeString();
+      showToast('État enregistré dans le Drive Store local !');
+    }
+
+    function exportDriveStoreJson() {
+      const driveData = {
+        timestamp: new Date().toISOString(),
+        version: "GEMIN CORE V7 PRO FINAL",
+        signature: "ZOUBIROU-IA-2025",
+        entity: "SAHBI S.A.",
+        studioConfig: studioConfig,
+        currentSurah: surahs[currentIndex],
+        language: curLang,
+        theme: document.documentElement.getAttribute('data-theme') || 'emerald'
+      };
+      const blob = new Blob([JSON.stringify(driveData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mplayer_drive_store.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Export Drive Store mplayer_drive_store.json réussi !');
+    }
+
+    function importDriveStoreJson(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.studioConfig) {
+            studioConfig = { ...studioConfig, ...data.studioConfig };
+            document.getElementById('cfgReciter').value = studioConfig.reciter || '';
+            document.getElementById('cfgEntity').value = studioConfig.entity || 'SAHBI S.A.';
+            document.getElementById('cfgCdn').value = studioConfig.cdn || '';
+            document.getElementById('cfgBitrate').value = studioConfig.bitrate || '128';
+            syncConfigToJsonArea();
+          }
+          if (data.theme) {
+            document.documentElement.setAttribute('data-theme', data.theme);
+            document.getElementById('themeBtn').innerText = 'Theme: ' + (data.theme === 'emerald' ? 'Emerald' : 'Mythos');
+          }
+          showToast('Drive Store importé avec succès !');
+        } catch (err) {
+          showToast("Erreur lors de l'import : " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function copyAi23Certificate() {
+      const cert = `--- CERTIFICAT D'INTÉGRITÉ AI23 ---\nORGANISATION: SAHBI S.A.\nDIRECTEUR TECHNIQUE: MOHAMMED ILYES ZOUBIROU\nLICENCE: LICENSE NETSECUREPRO.CA\nCORE: GEMIN CORE V7 PRO FINAL\nSIGNATURE: IA_LOGIC_SIGNATURE: ZOUBIROU-IA-2025\nPROTOCOLE: AI23-STANDALONE-V7-PRO\nTIMESTAMP: ${new Date().toISOString()}\nORIGINE: https://github.com/milyes/MPLAYER-islam.git\n-----------------------------------`;
+      navigator.clipboard.writeText(cert).then(() => {
+        showToast("Certificat d'intégrité AI23 copié !");
+      }).catch(err => {
+        showToast('Erreur : ' + err.message);
+      });
+    }
+
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      box.innerText = msg;
+      box.style.opacity = '1';
+      setTimeout(() => {
+        box.style.opacity = '0';
+      }, 3000);
+    }
+
+    // Init
+    renderSurahs(surahs);
+    syncConfigToJsonArea();
+  </script>
+</body>
+</html>
